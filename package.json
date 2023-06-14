@@ -1,5 +1,5 @@
 {
-	"name": "enigma-bot",
+	"name": "seeker-bot",
 	"version": "1.0.0",
 	"description": " ",
 	"main": "./src/index.ts",

@@ -1,4 +1,4 @@
-import { setGuildOption } from "../functions";
+import { setGuildOption } from "../utils/functions";
 import { Command } from "../types";
 
 const command: Command = {

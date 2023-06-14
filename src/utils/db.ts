@@ -1,7 +1,19 @@
 import mongoose from "mongoose";
+import { color } from "./functions";
 
 interface anyInterface extends mongoose.Document {
 	[key: string]: any;
+}
+
+export async function connect_db() {
+	const MONGO_URI = process.env.MONGO_URI;
+	const MONGO_DATABASE_NAME = process.env.MONGO_DATABASE_NAME;
+
+	console.log(color("text", `🍃 Connecting to MongoDB...`));
+	await mongoose
+		.connect(`${MONGO_URI}`, { dbName: MONGO_DATABASE_NAME })
+		.then(() => console.log(color("text", `🍃 MongoDB connection has been ${color("variable", "established.")}`)))
+		.catch(() => console.log(color("text", `🍃 MongoDB connection has been ${color("error", "failed.")}`)));
 }
 
 export function find_DB_CB(collection: string, query: any, cb: any) {

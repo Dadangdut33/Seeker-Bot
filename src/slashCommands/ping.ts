@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { getThemeColor } from "../functions";
+import { getThemeColor } from "../utils/functions";
 import { SlashCommand } from "../types";
 
 const command: SlashCommand = {
 	command: new SlashCommandBuilder().setName("ping").setDescription("Shows the bot's ping"),
-	execute: (interaction) => {
+	execute: async (interaction) => {
 		interaction.reply({
 			embeds: [
 				// prettier-ignore
