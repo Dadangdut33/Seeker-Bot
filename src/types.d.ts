@@ -18,22 +18,34 @@ export interface Command {
 	disabled?: boolean;
 }
 
+export interface BotEvent {
+	name: string;
+	loadMsg?: string;
+	once?: boolean | false;
+	execute: (...args) => void;
+	disabled?: boolean;
+}
+
 interface GuildOptions {
 	prefix: string;
 }
 
-export interface IGuild extends mongoose.Document {
+export interface IGuild {
 	guildID: string;
 	options: GuildOptions;
 	joinedAt: Date;
 }
 
-export type GuildOption = keyof GuildOptions;
-export interface BotEvent {
-	name: string;
-	once?: boolean | false;
-	execute: (...args) => void;
+export interface IGuildMongo extends mongoose.Document {}
+
+export interface IAuditWatch {
+	guildID: string;
+	outputChName: string;
 }
+
+export interface IAuditWatchMongo extends mongoose.Document {}
+
+export type GuildOption = keyof GuildOptions;
 
 declare global {
 	namespace NodeJS {

@@ -1,12 +1,13 @@
 import { Client } from "discord.js";
 import { BotEvent } from "../types";
-import { color } from "../utils/functions";
+import { logColor } from "../utils/helper";
+import { logger } from "../logger";
 
 const event: BotEvent = {
 	name: "ready",
 	once: true,
 	execute: (client: Client) => {
-		console.log(color("text", `💪 Logged in as ${color("variable", client.user?.tag)}`));
+		logger.info(logColor("text", `💪 Logged in as ${logColor("variable", client.user?.tag)}`));
 	},
 };
 

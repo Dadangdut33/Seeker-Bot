@@ -1,38 +1,42 @@
 import mongoose from "mongoose";
-import { color } from "./functions";
+import { Guild } from "discord.js";
+import { logColor } from "./helper";
+import GuildDB from "../schemas/Guild";
+import { GuildOption } from "../types";
+import { logger } from "../logger";
 
-interface anyInterface extends mongoose.Document {
-	[key: string]: any;
-}
+export const getGuildOption = async (guild: Guild, option: GuildOption) => {
+	if (mongoose.connection.readyState === 0) throw new Error("Database not connected.");
+	let foundGuild = await GuildDB.findOne({ guildID: guild.id });
+	if (!foundGuild) return null;
+	return foundGuild.options[option];
+};
+
+export const setGuildOption = async (guild: Guild, option: GuildOption, value: any) => {
+	if (mongoose.connection.readyState === 0) throw new Error("Database not connected.");
+	let foundGuild = await GuildDB.findOne({ guildID: guild.id });
+	if (!foundGuild) return null;
+	foundGuild.options[option] = value;
+	foundGuild.save();
+};
 
 export async function connect_db() {
 	const MONGO_URI = process.env.MONGO_URI;
 	const MONGO_DATABASE_NAME = process.env.MONGO_DATABASE_NAME;
 
-	console.log(color("text", `🍃 Connecting to MongoDB...`));
+	logger.info(`🍃 Connecting to MongoDB...`);
 	await mongoose
 		.connect(`${MONGO_URI}`, { dbName: MONGO_DATABASE_NAME })
-		.then(() => console.log(color("text", `🍃 MongoDB connection has been ${color("variable", "established.")}`)))
-		.catch(() => console.log(color("text", `🍃 MongoDB connection has been ${color("error", "failed.")}`)));
+		.then(() => logger.debug(`🍃 MongoDB connection has been ${logColor("variable", "established.")}`))
+		.catch((e) => logger.error(`🍃 MongoDB connection has ${logColor("error", "failed.")} | Reason ${e}`));
 }
 
-export function find_DB_CB(collection: string, query: any, cb: any) {
-	// @ts-ignore
-	mongoose.connection.db.collection(collection, function (err: any, collection: any) {
-		collection.find(query).toArray(cb);
-	});
+export async function find_collection(collection: string, query: any) {
+	return mongoose.connection.db.collection(collection).find(query);
 }
 
-export function find_DB_Return(tablename: string, query: any): Promise<anyInterface[]> {
-	return new Promise((resolve, reject) => {
-		// @ts-ignore
-		mongoose.connection.db.collection(tablename, function (err: any, collection: any) {
-			collection.find(query).toArray(function (err: any, result: any) {
-				if (err) reject(err);
-				resolve(result);
-			});
-		});
-	});
+export async function find_one_collection(collection: string, query: any) {
+	return mongoose.connection.db.collection(collection).findOne(query);
 }
 
 export async function insert_collection(collection: string, doc: any) {

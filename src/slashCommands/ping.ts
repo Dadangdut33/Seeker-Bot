@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { getThemeColor } from "../utils/functions";
+import { CUSTOM_COLORS } from "../utils";
 import { SlashCommand } from "../types";
 
 const command: SlashCommand = {
@@ -11,7 +11,7 @@ const command: SlashCommand = {
 				new EmbedBuilder()
 					.setAuthor({ name: "MRC License" })
 					.setDescription(`🏓 Pong! \n 📡 Ping: ${interaction.client.ws.ping}`)
-					.setColor(getThemeColor("text")),
+					.setColor(CUSTOM_COLORS.Aqua),
 			],
 		});
 	},

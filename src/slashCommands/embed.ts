@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, TextChannel, EmbedBuilder, ColorResolvable } from "discord.js";
 import { SlashCommand } from "../types";
+import { logger } from "../logger";
 
 const command: SlashCommand = {
 	command: new SlashCommandBuilder()
@@ -71,7 +72,7 @@ const command: SlashCommand = {
 			}
 			await interaction.respond(filtered);
 		} catch (error) {
-			console.log(`Error: ${error.message}`);
+			logger.error(`Error: ${error.message}`);
 		}
 	},
 	execute: async (interaction) => {

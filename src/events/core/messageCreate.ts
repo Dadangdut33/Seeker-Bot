@@ -1,10 +1,11 @@
 import { ChannelType, Message } from "discord.js";
-import { checkPermissions, getGuildOption, sendTimedMessage } from "../utils/functions";
-import { BotEvent } from "../types";
+import { checkPermissions, getGuildOption, sendTimedMessage } from "../../utils";
+import { BotEvent } from "../../types";
 import mongoose from "mongoose";
 
 const event: BotEvent = {
 	name: "messageCreate",
+	loadMsg: "📨 Message event loaded | Will handle prefix and cooldowns",
 	execute: async (message: Message) => {
 		if (!message.member || message.member.user.bot) return;
 		if (!message.guild) return;
@@ -29,14 +30,7 @@ const event: BotEvent = {
 		let cooldown = message.client.cooldowns.get(`${command.name}-${message.member.user.username}`);
 		let neededPermissions = checkPermissions(message.member, command.permissions);
 		if (neededPermissions !== null)
-			return sendTimedMessage(
-				`
-            You don't have enough permissions to use this command. 
-            \n Needed permissions: ${neededPermissions.join(", ")}
-            `,
-				message.channel,
-				5000
-			);
+			return sendTimedMessage(`You don't have enough permissions to use this command.  \n Needed permissions: ${neededPermissions.join(", ")}`, message.channel, 5000);
 
 		if (command.cooldown && cooldown) {
 			if (Date.now() < cooldown) {

@@ -1,5 +1,5 @@
-import { setGuildOption } from "../utils/functions";
-import { Command } from "../types";
+import { setGuildOption } from "../../utils";
+import { Command } from "../../types";
 
 const command: Command = {
 	name: "changePrefix",
@@ -11,7 +11,7 @@ const command: Command = {
 		message.channel.send("Prefix successfully changed!");
 	},
 	permissions: ["Administrator"],
-	aliases: [],
+	aliases: ["cp"],
 };
 
 export default command;

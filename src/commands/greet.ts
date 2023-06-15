@@ -9,7 +9,7 @@ const command: Command = {
 	},
 	cooldown: 10,
 	aliases: ["sayhello"],
-	permissions: ["Administrator", PermissionFlagsBits.ManageEmojisAndStickers], // to test
+	permissions: ["Administrator", PermissionFlagsBits.ManageEmojisAndStickers, "ManageEmojisAndStickers"], // to test
 };
 
 export default command;

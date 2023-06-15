@@ -1,9 +1,9 @@
 import { Client, Routes, SlashCommandBuilder } from "discord.js";
 import { REST } from "@discordjs/rest";
-import { readdirSync } from "fs";
 import { join } from "path";
-import { color } from "../utils/functions";
+import { logColor, walkdir } from "../utils";
 import { Command, SlashCommand } from "../types";
+import { logger } from "../logger";
 
 module.exports = (client: Client) => {
 	const slashCommands: SlashCommandBuilder[] = [];
@@ -13,18 +13,20 @@ module.exports = (client: Client) => {
 	let commandsDir = join(__dirname, "../commands");
 
 	// load slash commands
-	readdirSync(slashCommandsDir).forEach((file) => {
-		if (!file.endsWith(".js")) return;
-		let command: SlashCommand = require(`${slashCommandsDir}/${file}`).default;
+	logger.info(logColor("text", `🔥 Loading slash commands...`));
+	walkdir(slashCommandsDir).forEach((file) => {
+		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
+		let command: SlashCommand = require(file).default;
 		if (command.disabled) return; // check disabled
 		slashCommands.push(command.command);
 		client.slashCommands.set(command.command.name, command);
 	});
 
 	// load regular commands
-	readdirSync(commandsDir).forEach((file) => {
-		if (!file.endsWith(".js")) return;
-		let command: Command = require(`${commandsDir}/${file}`).default;
+	logger.info(logColor("text", `🔥 Loading commands...`));
+	walkdir(commandsDir).forEach((file) => {
+		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
+		let command: Command = require(file).default;
 		if (command.disabled) return; // check disabled
 		commands.push(command);
 		client.commands.set(command.name, command);
@@ -38,10 +40,10 @@ module.exports = (client: Client) => {
 			body: slashCommands.map((command) => command.toJSON()),
 		})
 		.then((data: any) => {
-			console.log(color("text", `🔥 Successfully loaded ${color("variable", data.length)} slash command(s)`));
-			console.log(color("text", `🔥 Successfully loaded ${color("variable", commands.length)} command(s)`));
+			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
+			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
 		})
 		.catch((e) => {
-			console.log(e);
+			logger.error(e);
 		});
 };
