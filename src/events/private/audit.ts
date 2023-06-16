@@ -1,7 +1,8 @@
 import { Client, TextChannel, Guild, APIEmbed, ChannelType } from "discord.js";
-import { find_collection, CUSTOM_COLORS } from "../../utils";
+import { find_model, CUSTOM_COLORS } from "../../utils";
 import { BotEvent, IAuditWatch } from "../../types";
 import { logger } from "../../logger";
+import { AuditWatchModel } from "../../schemas";
 const debugmode = false;
 const moduleName = "audit.ts";
 
@@ -32,7 +33,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 				url: message.attachments.map((x) => x.url)[0] || message.attachments.map((x) => x.proxyURL)[0] || "",
 			},
 			color: CUSTOM_COLORS.Black,
-			timestamp: new Date().toString(),
+			timestamp: new Date().toISOString(),
 			footer: {
 				text: `Deleted`,
 			},
@@ -59,7 +60,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 				description: `<@${newMember.user.id}> - *${newMember.user.id}*`,
 				url: newMember.user.displayAvatarURL({ extension: "png", size: 2048 }),
 				color: CUSTOM_COLORS.Aqua,
-				timestamp: new Date().toString(),
+				timestamp: new Date().toISOString(),
 				footer: {
 					text: `${newMember.nickname || newMember.user.username}`,
 				},
@@ -107,7 +108,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 							description: `<@${newUser.id}> - *${newUser.id}*`,
 							url: newUser.displayAvatarURL({ extension: "png", size: 2048 }),
 							color: CUSTOM_COLORS.Aqua,
-							timestamp: new Date().toString(),
+							timestamp: new Date().toISOString(),
 							footer: {
 								text: `${member.nickname || member.user.username}`,
 							},
@@ -140,7 +141,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 							description: `<@${newUser.id}> - *${newUser.id}*`,
 							url: newUser.displayAvatarURL({ extension: "png", size: 2048 }),
 							color: CUSTOM_COLORS.Aqua,
-							timestamp: new Date().toString(),
+							timestamp: new Date().toISOString(),
 							footer: {
 								text: `${member.nickname || member.user.username}`,
 							},
@@ -174,7 +175,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 							description: `<@${newUser.id}> - *${newUser.id}*\n\n**Old Avatar** :arrow_down:`,
 							url: newUser.displayAvatarURL({ extension: "png", size: 2048 }),
 							color: CUSTOM_COLORS.Aqua,
-							timestamp: new Date().toString(),
+							timestamp: new Date().toISOString(),
 							footer: {
 								text: `Old avatar might not show up`,
 							},
@@ -202,6 +203,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 	function send(client: Client, guild: Guild, opt: optionsInterface, embed: APIEmbed) {
 		try {
 			let cur_opt = opt.options.find((val) => val.guildID === guild.id);
+
 			if (!cur_opt) return logger.debug(`Module: ${moduleName} | Invalid options ${cur_opt}`);
 			if (debugmode) logger.debug(`Module: ${moduleName} | configuration get options:`, opt); // DEBUG
 
@@ -241,7 +243,7 @@ const event: BotEvent = {
 	once: true,
 	execute: async (client: Client) => {
 		try {
-			const watchlist = (await find_collection("auditWatch", {})) as unknown as IAuditWatch[];
+			const watchlist = (await find_model(AuditWatchModel, {})) as unknown as IAuditWatch[];
 			AuditLog(client, { options: watchlist });
 		} catch (error) {
 			logger.error(`Module: ${moduleName} | Fail to load, details: ${error}`);

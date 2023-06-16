@@ -1,13 +1,14 @@
 import { Schema, model } from "mongoose";
 import { IGuild } from "../types";
 
-const GuildSchema = new Schema<IGuild>({
-	guildID: { required: true, type: String },
-	options: {
-		prefix: { type: String, default: process.env.PREFIX },
+export const GuildSchema = new Schema<IGuild>(
+	{
+		guildID: { required: true, type: String },
+		options: {
+			prefix: { type: String, default: process.env.PREFIX },
+		},
 	},
-});
+	{ collection: "guilds" }
+);
 
-const GuildModel = model("guild", GuildSchema);
-
-export default GuildModel;
+export const GuildModel = model("guilds", GuildSchema);

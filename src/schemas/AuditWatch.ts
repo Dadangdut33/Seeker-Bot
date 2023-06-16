@@ -1,13 +1,12 @@
 import { Schema, model } from "mongoose";
-import { IGuild } from "../types";
+import { IAuditWatch } from "../types";
 
-const AuditWatchSchema = new Schema<IGuild>({
-	guildID: { required: true, type: String },
-	options: {
-		prefix: { type: String, default: process.env.PREFIX },
+export const AuditWatchSchema = new Schema<IAuditWatch>(
+	{
+		guildID: { required: true, type: String },
+		outputChName: { required: true, type: String },
 	},
-});
+	{ collection: "auditwatch" }
+);
 
-const AuditWatchModel = model("auditwatch", AuditWatchSchema);
-
-export default AuditWatchModel;
+export const AuditWatchModel = model("auditwatch", AuditWatchSchema);
