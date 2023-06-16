@@ -10,11 +10,12 @@ export const CUSTOM_COLORS = {
 	Black: 0x000000,
 };
 
-export type consoleColorType = "text" | "variable" | "error";
+export type consoleColorType = "text" | "variable" | "error" | "highlight" | "important" | "warning";
 export const CONSOLE_COLORS = {
 	text: "#ff8e4d",
 	variable: "#ff624d",
 	error: "#f5426c",
 	highlight: "#ffff00",
 	important: "0xffffff",
+	warning: "#ff8e4d",
 };

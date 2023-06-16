@@ -1,10 +1,10 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { SlashCommand } from "../types";
+import { SlashCommand } from "../../types";
 
 const ClearCommand: SlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("clear")
-		.setDescription("Delets messages from the current channel.")
+		.setDescription("Deletes messages from the current channel.")
 		.addIntegerOption((option) => {
 			return option.setMaxValue(100).setMinValue(1).setName("messagecount").setDescription("Message amount to be cleared");
 		})
@@ -20,7 +20,6 @@ const ClearCommand: SlashCommand = {
 			setTimeout(() => interaction.deleteReply(), 5000);
 		});
 	},
-	cooldown: 10,
 };
 
 export default ClearCommand;

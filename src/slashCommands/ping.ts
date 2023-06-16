@@ -5,17 +5,18 @@ import { SlashCommand } from "../types";
 const command: SlashCommand = {
 	command: new SlashCommandBuilder().setName("ping").setDescription("Shows the bot's ping"),
 	execute: async (interaction) => {
-		interaction.reply({
+		const msg = await interaction.reply({ embeds: [{ title: "🛰️ Pinging..." }] });
+
+		msg.edit({
 			embeds: [
 				// prettier-ignore
 				new EmbedBuilder()
-					.setAuthor({ name: "MRC License" })
-					.setDescription(`🏓 Pong! \n 📡 Ping: ${interaction.client.ws.ping}`)
+					.setTitle( "🏓 Pong!")
+					.setDescription(`📶 Latency: ${Math.floor(msg.createdAt.getTime() - interaction.createdAt.getTime())}ms\n📡 API Latency: ${Math.round(interaction.client.ws.ping)}`)
 					.setColor(CUSTOM_COLORS.Aqua),
 			],
 		});
 	},
-	cooldown: 10,
 };
 
 export default command;

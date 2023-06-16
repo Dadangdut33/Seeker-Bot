@@ -5,34 +5,41 @@ import { logColor, walkdir } from "../utils";
 import { Command, SlashCommand } from "../types";
 import { logger } from "../logger";
 
+/**
+ * @description
+ * This handler loads all slash commands and regular commands from the src/slashCommands and src/commands folders.
+ * After that it registers the slash commands as a simple REST API for discord.
+ */
 module.exports = (client: Client) => {
-	const slashCommands: SlashCommandBuilder[] = [];
-	const commands: Command[] = [];
+	const slashCommands: SlashCommandBuilder[] = [],
+		commands: Command[] = [],
+		slashCommandsDir = join(__dirname, "../slashCommands"),
+		commandsDir = join(__dirname, "../commands");
 
-	let slashCommandsDir = join(__dirname, "../slashCommands");
-	let commandsDir = join(__dirname, "../commands");
-
-	// load slash commands
 	logger.info(logColor("text", `🔥 Loading slash commands...`));
 	walkdir(slashCommandsDir).forEach((file) => {
 		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let command: SlashCommand = require(file).default;
-		if (command.disabled) return; // check disabled
-		slashCommands.push(command.command);
-		client.slashCommands.set(command.command.name, command);
+		let slashCommand: SlashCommand = require(file).default;
+
+		if (!slashCommand) return logger.warn(logColor("warning", `Slash command ${logColor("variable", file)} is not a valid slash command`));
+		if (slashCommand.disabled) return; // check disabled
+
+		slashCommands.push(slashCommand.command);
+		client.slashCommands.set(slashCommand.command.name, slashCommand);
 	});
 
-	// load regular commands
 	logger.info(logColor("text", `🔥 Loading commands...`));
 	walkdir(commandsDir).forEach((file) => {
 		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 		let command: Command = require(file).default;
+
+		if (!command) return logger.warn(logColor("warning", `Command ${logColor("variable", file)} is not a valid command`));
 		if (command.disabled) return; // check disabled
+
 		commands.push(command);
 		client.commands.set(command.name, command);
 	});
 
-	// register slash commands as a simple REST API for discord
 	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 	rest

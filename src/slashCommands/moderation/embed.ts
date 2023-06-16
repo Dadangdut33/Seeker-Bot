@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, TextChannel, EmbedBuilder, ColorResolvable } from "discord.js";
-import { SlashCommand } from "../types";
-import { logger } from "../logger";
+import { SlashCommand } from "../../types";
+import { logger } from "../../logger";
 
 const command: SlashCommand = {
 	command: new SlashCommandBuilder()
@@ -100,7 +100,6 @@ const command: SlashCommand = {
 			interaction.editReply({ content: "Something went wrong..." });
 		}
 	},
-	cooldown: 10,
 };
 
 export default command;
