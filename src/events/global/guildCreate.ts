@@ -1,8 +1,8 @@
 import { Guild } from "discord.js";
 import { GuildModel } from "../../schemas/Guild";
-import { BotEvent } from "../../types";
+import { IBotEvent } from "../../types";
 
-const event: BotEvent = {
+const event: IBotEvent = {
 	name: "guildCreate",
 	loadMsg: "📨 GuildCreate event loaded | Will save new guild to bot's DB",
 	execute: (guild: Guild) => {

@@ -2,7 +2,7 @@ import { Client, Routes, SlashCommandBuilder } from "discord.js";
 import { REST } from "@discordjs/rest";
 import { join } from "path";
 import { logColor, walkdir } from "../utils";
-import { Command, SlashCommand } from "../types";
+import { ICommand, ISlashCommand } from "../types";
 import { logger } from "../logger";
 
 /**
@@ -12,14 +12,14 @@ import { logger } from "../logger";
  */
 module.exports = (client: Client) => {
 	const slashCommands: SlashCommandBuilder[] = [],
-		commands: Command[] = [],
+		commands: ICommand[] = [],
 		slashCommandsDir = join(__dirname, "../slashCommands"),
 		commandsDir = join(__dirname, "../commands");
 
 	logger.info(logColor("text", `🔥 Loading slash commands...`));
 	walkdir(slashCommandsDir).forEach((file) => {
 		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let slashCommand: SlashCommand = require(file).default;
+		let slashCommand: ISlashCommand = require(file).default;
 
 		if (!slashCommand) return logger.warn(logColor("warning", `Slash command ${logColor("variable", file)} is not a valid slash command`));
 		if (slashCommand.disabled) return; // check disabled
@@ -31,7 +31,7 @@ module.exports = (client: Client) => {
 	logger.info(logColor("text", `🔥 Loading commands...`));
 	walkdir(commandsDir).forEach((file) => {
 		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let command: Command = require(file).default;
+		let command: ICommand = require(file).default;
 
 		if (!command) return logger.warn(logColor("warning", `Command ${logColor("variable", file)} is not a valid command`));
 		if (command.disabled) return; // check disabled

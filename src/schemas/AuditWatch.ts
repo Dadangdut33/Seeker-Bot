@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
-import { IAuditWatch } from "../types";
+import { AuditWatch_I } from "../types";
 
-export const AuditWatchSchema = new Schema<IAuditWatch>(
+export const AuditWatchSchema = new Schema<AuditWatch_I>(
 	{
 		guildID: { required: true, type: String },
 		outputChName: { required: true, type: String },

@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
-import { Command, SlashCommand } from "./types";
+import { ICommand, ISlashCommand, IGuild } from "./types";
 import { config } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
@@ -26,8 +26,9 @@ if (!process.env.SAUCENAO_API_KEY) logger.warn("WARNING!!! SauceNao API key is n
 		partials: [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction], // cache partials
 		allowedMentions: { parse: ["users", "roles"], repliedUser: true },
 	});
-	client.slashCommands = new Collection<string, SlashCommand>();
-	client.commands = new Collection<string, Command>();
+	client.slashCommands = new Collection<string, ISlashCommand>();
+	client.commands = new Collection<string, ICommand>();
+	client.guildPreferences = new Collection<string, IGuild>();
 	client.cooldowns = new Collection<string, number>();
 
 	// Load client handlers

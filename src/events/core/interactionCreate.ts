@@ -1,7 +1,7 @@
 import { Interaction } from "discord.js";
-import { BotEvent } from "../../types";
+import { IBotEvent } from "../../types";
 
-const event: BotEvent = {
+const event: IBotEvent = {
 	name: "interactionCreate",
 	loadMsg: "📨 Interaction event loaded",
 	execute: (interaction: Interaction) => {

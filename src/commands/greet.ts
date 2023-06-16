@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
-import { Command } from "../types";
+import { ICommand } from "../types";
 
-const command: Command = {
+const command: ICommand = {
 	name: "greet",
 	execute: (message, args) => {
 		let toGreet = message.mentions.members?.first();

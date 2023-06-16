@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, CommandInteraction, Collection, PermissionResolvable, Message, AutocompleteInteraction } from "discord.js";
 import mongoose from "mongoose";
 
-export interface SlashCommand {
+export interface ISlashCommand {
 	command: SlashCommandBuilder | any;
 	execute: (interaction: CommandInteraction) => void;
 	autocomplete?: (interaction: AutocompleteInteraction) => void;
@@ -9,7 +9,7 @@ export interface SlashCommand {
 	disabled?: boolean;
 }
 
-export interface Command {
+export interface ICommand {
 	name: string;
 	execute: (message: Message, args: Array<string>) => void;
 	permissions: Array<PermissionResolvable>;
@@ -18,7 +18,7 @@ export interface Command {
 	disabled?: boolean;
 }
 
-export interface BotEvent {
+export interface IBotEvent {
 	name: string;
 	loadMsg?: string;
 	once?: boolean | false;
@@ -26,27 +26,28 @@ export interface BotEvent {
 	disabled?: boolean;
 }
 
-interface GuildOptions {
+interface IGuildOptions {
 	prefix: string;
 }
 
 export interface IGuild {
 	guildID: string;
 	options: GuildOptions;
-	joinedAt: Date;
+	joinedAt?: Date;
 }
+
+export type TGuildOption = keyof IGuildOptions;
 
 export interface IGuildMongo extends mongoose.Document {}
 
-export interface IAuditWatch {
+export interface AuditWatch_I {
 	guildID: string;
 	outputChName: string;
 }
 
 export interface IAuditWatchMongo extends mongoose.Document {}
 
-export type GuildOption = keyof GuildOptions;
-
+// ------------------ Global ------------------
 declare global {
 	namespace NodeJS {
 		interface ProcessEnv {
@@ -61,8 +62,9 @@ declare global {
 
 declare module "discord.js" {
 	export interface Client {
-		slashCommands: Collection<string, SlashCommand>;
-		commands: Collection<string, Command>;
+		slashCommands: Collection<string, ISlashCommand>;
+		commands: Collection<string, ICommand>;
 		cooldowns: Collection<string, number>;
+		guildPreferences: Collection<string, IGuild>;
 	}
 }

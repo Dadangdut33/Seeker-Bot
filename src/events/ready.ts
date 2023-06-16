@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { BotEvent } from "../types";
+import { IBotEvent } from "../types";
 import { logColor } from "../utils/helper";
 import { activity } from "../utils/events/activity";
 import { logger } from "../logger";
@@ -11,7 +11,7 @@ function changeActivity(client: Client) {
 	});
 }
 
-const event: BotEvent = {
+const event: IBotEvent = {
 	name: "ready",
 	once: true,
 	execute: (client: Client) => {

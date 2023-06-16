@@ -1,7 +1,7 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { SlashCommand } from "../../types";
+import { ISlashCommand } from "../../types";
 
-const ClearCommand: SlashCommand = {
+const ClearCommand: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("clear")
 		.setDescription("Deletes messages from the current channel.")

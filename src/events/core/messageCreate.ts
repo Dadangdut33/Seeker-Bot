@@ -1,9 +1,9 @@
 import { ChannelType, Message } from "discord.js";
 import { checkPermissions, getGuildOption, sendTimedMessage } from "../../utils";
-import { BotEvent } from "../../types";
+import { IBotEvent } from "../../types";
 import mongoose from "mongoose";
 
-const event: BotEvent = {
+const event: IBotEvent = {
 	name: "messageCreate",
 	loadMsg: "📨 Message event loaded | Will handle prefix and cooldowns",
 	execute: async (message: Message) => {
@@ -11,7 +11,7 @@ const event: BotEvent = {
 		if (!message.guild) return;
 		let prefix = process.env.PREFIX;
 		if (mongoose.connection.readyState === 1) {
-			let guildPrefix = await getGuildOption(message.guild, "prefix");
+			let guildPrefix = await getGuildOption(message.client, message.guild, "prefix");
 			if (guildPrefix) prefix = guildPrefix;
 		}
 

@@ -1,8 +1,8 @@
 import mongoose, { Model, model } from "mongoose";
-import { Guild } from "discord.js";
+import { Client, Guild } from "discord.js";
 import { logColor } from "./helper";
 import { GuildModel, AnySchema } from "../schemas";
-import { GuildOption } from "../types";
+import { IGuild, TGuildOption } from "../types";
 import { logger } from "../logger";
 
 // ------------------ Connecting to DB ------------------ //
@@ -18,19 +18,57 @@ export async function connect_db() {
 }
 
 // ------------------ Guild Collection Helper ------------------ //
-export const getGuildOption = async (guild: Guild, option: GuildOption) => {
-	if (mongoose.connection.readyState === 0) throw new Error("Database not connected.");
-	let foundGuild = await GuildModel.findOne({ guildID: guild.id });
-	if (!foundGuild) return null;
-	return foundGuild.options[option];
+
+/**
+ * @description
+ * This function is used to get a guild option from the database.
+ * It will first check if guild is in local config, if not check db, if not on both we store it in db
+ * @param client
+ * @param guild
+ * @param option
+ * @returns
+ */
+export const getGuildOption = async (client: Client, guild: Guild, option: TGuildOption) => {
+	let foundGuild = client.guildPreferences.get(guild.id); // get from local config
+	if (!foundGuild) foundGuild = (await GuildModel.findOne({ guildID: guild.id })) as IGuild; // get from db
+	if (foundGuild) return foundGuild.options[option]; // return if found
+
+	// Create new guild if not found
+	const joinedAt = client.guilds.cache.get(guild.id)?.joinedAt || new Date();
+	const newGuild = new GuildModel({
+		guildID: guild.id,
+		options: {
+			prefix: process.env.PREFIX,
+		},
+		joinedAt,
+	});
+	newGuild.save(); // save to db
+	client.guildPreferences.set(guild.id, newGuild); // save to local config
+	return newGuild.options[option];
 };
 
-export const setGuildOption = async (guild: Guild, option: GuildOption, value: any) => {
+export const setGuildOption = async (client: Client, guild: Guild, option: TGuildOption, value: any) => {
 	if (mongoose.connection.readyState === 0) throw new Error("Database not connected.");
 	let foundGuild = await GuildModel.findOne({ guildID: guild.id });
-	if (!foundGuild) return null;
-	foundGuild.options[option] = value;
-	foundGuild.save();
+	if (foundGuild) {
+		foundGuild.options[option] = value;
+		foundGuild.save(); // update db
+		client.guildPreferences.set(guild.id, foundGuild); // update local config
+		return;
+	}
+
+	// Create new guild if not found
+	const joinedAt = client.guilds.cache.get(guild.id)?.joinedAt || new Date();
+	const newGuild = new GuildModel({
+		guildID: guild.id,
+		options: {
+			prefix: process.env.PREFIX,
+		},
+		joinedAt,
+	});
+	newGuild.options[option] = value;
+	newGuild.save(); // save to db
+	client.guildPreferences.set(guild.id, newGuild); // save to local config
 };
 
 // ------------------ Query Helper Using Model Object ------------------ //

@@ -1,13 +1,13 @@
 import { Client, TextChannel, Guild, APIEmbed, ChannelType } from "discord.js";
 import { find_model, CUSTOM_COLORS } from "../../utils";
-import { BotEvent, IAuditWatch } from "../../types";
+import { IBotEvent, AuditWatch_I } from "../../types";
 import { logger } from "../../logger";
 import { AuditWatchModel } from "../../schemas";
 const debugmode = false;
 const moduleName = "audit.ts";
 
 interface optionsInterface {
-	options: IAuditWatch[];
+	options: AuditWatch_I[];
 }
 
 function AuditLog(client: Client, options: optionsInterface) {
@@ -237,13 +237,13 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 	}
 }
 
-const event: BotEvent = {
+const event: IBotEvent = {
 	name: "ready",
 	loadMsg: `🔃 Loaded ${moduleName} | Watching for changes`,
 	once: true,
 	execute: async (client: Client) => {
 		try {
-			const watchlist = (await find_model(AuditWatchModel, {})) as unknown as IAuditWatch[];
+			const watchlist = (await find_model(AuditWatchModel, {})) as unknown as AuditWatch_I[];
 			AuditLog(client, { options: watchlist });
 		} catch (error) {
 			logger.error(`Module: ${moduleName} | Fail to load, details: ${error}`);

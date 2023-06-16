@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "discord.js";
-import { SlashCommand } from "../../types";
+import { ISlashCommand } from "../../types";
 import { logger } from "../../logger";
 
-const command: SlashCommand = {
+const command: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("help").setDescription("Get help of a command"),
 
 	execute: (interaction) => {
