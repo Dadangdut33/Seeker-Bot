@@ -85,7 +85,7 @@ const run_nyaa = async (guildID: string, channel: TextChannel) => {
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
-	loadMsg: `Module: Nyaa rss feed | Loading feed`,
+	loadMsg: `👀 Module: ${__filename} rss feed | Loading feed`,
 	execute: async (client: Client) => {
 		const guildID = process.env.PERSONAL_SERVER_ID!,
 			channelID = process.env.PERSONAL_SERVER_NYAA_CHANNEL_ID!;

@@ -6,7 +6,7 @@ import { crosspost, detectAnimeSearch, detectHaiku, detectMangaSearch } from "..
 
 const event: IBotEvent = {
 	name: "messageCreate",
-	loadMsg: "📨 Message event loaded | Will handle prefix, cooldowns, crosspost, haiku, facebooklinks, and manga/anime search",
+	loadMsg: `👀 Module: 📨 ${__filename} loaded | Will handle prefix, cooldowns, crosspost, haiku, facebooklinks, and manga/anime search`,
 	execute: async (message: Message) => {
 		if (!message.member || message.member.user.bot) return;
 		if (!message.guild) return;

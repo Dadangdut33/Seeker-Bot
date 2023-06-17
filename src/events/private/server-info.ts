@@ -216,7 +216,7 @@ const startServerInfoPoll = (
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
-	loadMsg: `Module: Server info loaded`,
+	loadMsg: `👀 Module: ${__filename} loaded`,
 	execute: async (client: Client) => {
 		const guildID = process.env.PERSONAL_SERVER_ID,
 			// too much to be put into .env so just put it here if you want to use it

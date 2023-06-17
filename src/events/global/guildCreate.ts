@@ -4,7 +4,7 @@ import { IBotEvent } from "../../types";
 
 const event: IBotEvent = {
 	name: "guildCreate",
-	loadMsg: "📨 GuildCreate event loaded | Will save new guild to bot's DB",
+	loadMsg: `👀 Module: 📨 ${__filename} event loaded | Will save new guild to bot's DB`,
 	execute: (guild: Guild) => {
 		let newGuild = new GuildModel({
 			guildID: guild.id,

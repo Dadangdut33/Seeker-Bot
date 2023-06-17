@@ -3,7 +3,7 @@ import { IBotEvent } from "../../types";
 
 const event: IBotEvent = {
 	name: "interactionCreate",
-	loadMsg: "📨 Interaction event loaded",
+	loadMsg: `👀 Module: 📨 ${__filename} loaded`,
 	execute: (interaction: Interaction) => {
 		if (interaction.isChatInputCommand()) {
 			let command = interaction.client.slashCommands.get(interaction.commandName);

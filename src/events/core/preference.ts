@@ -12,7 +12,7 @@ import { GuildModel } from "../../schemas";
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
-	loadMsg: "⚙️ Guild preferences events loaded!",
+	loadMsg: `👀 Module: ⚙️ ${__filename} events loaded! | Storing guild preferences...`,
 	execute: async (client: Client) => {
 		logger.info("⚙️ Loading guilds preferences...");
 		const current_guilds_id_list = client.guilds.cache.map((guild) => guild.id);

@@ -5,7 +5,7 @@ import { logger } from "../../logger";
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
-	loadMsg: `Module: Member-Count Loaded | Now waiting for new members...`,
+	loadMsg: `👀 Module: ${__filename} Loaded | Now waiting for new members...`,
 	execute: (client: Client) => {
 		const guildID = process.env.PERSONAL_SERVER_ID!,
 			channelID = process.env.PERSONAL_SERVER_MEMBER_COUNT_ID!;

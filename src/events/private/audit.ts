@@ -4,7 +4,6 @@ import { IBotEvent, AuditWatch_I } from "../../types";
 import { logger } from "../../logger";
 import { AuditWatchModel } from "../../schemas";
 const debugmode = false;
-const moduleName = "audit.ts";
 
 interface optionsInterface {
 	options: AuditWatch_I[];
@@ -16,7 +15,7 @@ function AuditLog(client: Client, options: optionsInterface) {
 		if (message.author) if (message.author.bot) return;
 		if (message.channel.type === ChannelType.DM) return; // return if dm
 		if (message.attachments.size === 0) return;
-		if (debugmode) logger.debug(`Module: ${moduleName} | messageDelete triggered`);
+		if (debugmode) logger.debug(`Module: ${__filename} | messageDelete triggered`);
 
 		let embed: APIEmbed = {
 			description: `
@@ -45,7 +44,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 		if (message && message.member && typeof message.member.guild === "object") {
 			send(client, message.member.guild, options, embed);
 		} else {
-			console.error(`Module: ${moduleName} | messageDelete - ERROR - member guild id couldn't be retrieved`);
+			console.error(`Module: ${__filename} | messageDelete - ERROR - member guild id couldn't be retrieved`);
 			console.error("author", message.author);
 			console.error("member", message.member);
 			console.error("content", message.content);
@@ -54,7 +53,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 
 	// *USER NICKNAME UPDATE
 	client.on("guildMemberUpdate", (oldMember, newMember) => {
-		if (debugmode) logger.debug(`Module: ${moduleName} | guildMemberUpdate:nickname triggered`);
+		if (debugmode) logger.debug(`Module: ${__filename} | guildMemberUpdate:nickname triggered`);
 		if (oldMember.nickname !== newMember.nickname) {
 			let embed: APIEmbed = {
 				description: `<@${newMember.user.id}> - *${newMember.user.id}*`,
@@ -89,7 +88,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 
 	// *USER UPDATE AVATAR, USERNAME, DISCRIMINATOR
 	client.on("userUpdate", (oldUser, newUser) => {
-		if (debugmode) logger.debug(`Module: ${moduleName} | userUpdate triggered`);
+		if (debugmode) logger.debug(`Module: ${__filename} | userUpdate triggered`);
 
 		// Log type
 		let usernameChangedMsg: APIEmbed | null = null,
@@ -102,7 +101,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 				if (newUser.id === memberid) {
 					// USERNAME CHANGED
 					if (oldUser.username !== newUser.username) {
-						if (debugmode) logger.debug(`Module: ${moduleName} | userUpdate:USERNAME triggered`);
+						if (debugmode) logger.debug(`Module: ${__filename} | userUpdate:USERNAME triggered`);
 
 						usernameChangedMsg = {
 							description: `<@${newUser.id}> - *${newUser.id}*`,
@@ -135,7 +134,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 
 					// DISCRIMINATOR CHANGED
 					if (oldUser.discriminator !== newUser.discriminator) {
-						if (debugmode) logger.debug(`Module: ${moduleName} | userUpdate:DISCRIMINATOR triggered`);
+						if (debugmode) logger.debug(`Module: ${__filename} | userUpdate:DISCRIMINATOR triggered`);
 
 						discriminatorChangedMsg = {
 							description: `<@${newUser.id}> - *${newUser.id}*`,
@@ -169,7 +168,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 
 					// AVATAR CHANGED
 					if (oldUser.avatar !== newUser.avatar) {
-						if (debugmode) logger.debug(`Module: ${moduleName} | userUpdate:AVATAR triggered`);
+						if (debugmode) logger.debug(`Module: ${__filename} | userUpdate:AVATAR triggered`);
 
 						avatarChangedMsg = {
 							description: `<@${newUser.id}> - *${newUser.id}*\n\n**Old Avatar** :arrow_down:`,
@@ -204,49 +203,49 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 		try {
 			let cur_opt = opt.options.find((val) => val.guildID === guild.id);
 
-			if (!cur_opt) return logger.debug(`Module: ${moduleName} | Invalid options ${cur_opt}`);
-			if (debugmode) logger.debug(`Module: ${moduleName} | configuration get options:`, opt); // DEBUG
+			if (!cur_opt) return logger.debug(`Module: ${__filename} | Invalid options ${cur_opt}`);
+			if (debugmode) logger.debug(`Module: ${__filename} | configuration get options:`, opt); // DEBUG
 
 			const channelname = cur_opt.outputChName;
 			if (!channelname) {
-				if (debugmode) logger.debug(`Module: ${moduleName} | send - no channel configured`);
+				if (debugmode) logger.debug(`Module: ${__filename} | send - no channel configured`);
 				return;
 			}
 
 			// check channel
 			const channel = guild.channels.cache.find((val) => val.name === channelname) || guild.channels.cache.find((val) => val.id === channelname);
-			if (!channel) return logger.debug(`${moduleName} -> The channel "${channelname}" do not exist on server "${guild.name}" (${guild.id})`);
+			if (!channel) return logger.debug(`${__filename} -> The channel "${channelname}" do not exist on server "${guild.name}" (${guild.id})`);
 
 			// check permission
 			if (!channel.permissionsFor(client.user!)!.has("SendMessages"))
 				return logger.debug(
-					`${moduleName} -> The client doesn't have the permission to send message to the configured channel "${channelname}" on server "${guild.name}" (${guild.id})`
+					`${__filename} -> The client doesn't have the permission to send message to the configured channel "${channelname}" on server "${guild.name}" (${guild.id})`
 				);
 
 			if (!channel.permissionsFor(client.user!)!.has("EmbedLinks"))
 				return logger.debug(
-					`${moduleName} -> The client doesn't have the permission EmbedLinks to the configured channel "${channelname}" on server "${guild.name}" (${guild.id})`
+					`${__filename} -> The client doesn't have the permission EmbedLinks to the configured channel "${channelname}" on server "${guild.name}" (${guild.id})`
 				);
 
-			if (debugmode) logger.debug(`Module: ${moduleName} | send - sending embed to ${channel.name}`);
+			if (debugmode) logger.debug(`Module: ${__filename} | send - sending embed to ${channel.name}`);
 
 			(channel as TextChannel).send({ embeds: [embed] }).catch(console.error);
 		} catch (error) {
-			logger.error(`Module: ${moduleName} | send - error`, error);
+			logger.error(`Module: ${__filename} | send - error`, error);
 		}
 	}
 }
 
 const event: IBotEvent = {
 	name: "ready",
-	loadMsg: `🔃 Loaded ${moduleName} | Watching for changes`,
+	loadMsg: `👀 Module: ${__filename} loaded | Watching for changes`,
 	once: true,
 	execute: async (client: Client) => {
 		try {
 			const watchlist = (await find_model(AuditWatchModel, {})) as unknown as AuditWatch_I[];
 			AuditLog(client, { options: watchlist });
 		} catch (error) {
-			logger.error(`Module: ${moduleName} | Fail to load, details: ${error}`);
+			logger.error(`Module: ${__filename} | Fail to load, details: ${error}`);
 		}
 	},
 };
