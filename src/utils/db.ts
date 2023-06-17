@@ -18,7 +18,6 @@ export async function connect_db() {
 }
 
 // ------------------ Guild Collection Helper ------------------ //
-
 /**
  * @description
  * This function is used to get a guild option from the database.

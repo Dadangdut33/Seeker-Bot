@@ -2,10 +2,11 @@ import { ChannelType, Message } from "discord.js";
 import { checkPermissions, getGuildOption, sendTimedMessage } from "../../utils";
 import { IBotEvent } from "../../types";
 import mongoose from "mongoose";
+import { crosspost, detectAnimeSearch, detectHaiku, detectMangaSearch } from "../../utils/events/listener";
 
 const event: IBotEvent = {
 	name: "messageCreate",
-	loadMsg: "📨 Message event loaded | Will handle prefix and cooldowns",
+	loadMsg: "📨 Message event loaded | Will handle prefix, cooldowns, crosspost, haiku, facebooklinks, and manga/anime search",
 	execute: async (message: Message) => {
 		if (!message.member || message.member.user.bot) return;
 		if (!message.guild) return;
@@ -15,7 +16,15 @@ const event: IBotEvent = {
 			if (guildPrefix) prefix = guildPrefix;
 		}
 
-		if (!message.content.startsWith(prefix)) return;
+		// Global events that is not related to commands
+		if (!message.content.startsWith(prefix)) {
+			crosspost(message);
+			detectHaiku(message);
+			detectMangaSearch(message, prefix);
+			detectAnimeSearch(message, prefix);
+			return;
+		}
+
 		if (message.channel.type !== ChannelType.GuildText) return;
 
 		let args = message.content.substring(prefix.length).split(" ");

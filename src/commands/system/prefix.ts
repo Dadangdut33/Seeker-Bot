@@ -3,6 +3,7 @@ import { ICommand } from "../../types";
 
 const command: ICommand = {
 	name: "prefix",
+	description: "Change the prefix of the bot in the current guild",
 	execute: (message, args) => {
 		let prefix = args[1];
 		if (!prefix) return message.channel.send("No prefix provided");

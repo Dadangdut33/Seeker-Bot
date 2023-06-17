@@ -3,6 +3,7 @@ import { ICommand } from "../types";
 
 const command: ICommand = {
 	name: "greet",
+	description: "Debug command. Dont forget to disable it before pushing to production!",
 	execute: (message, args) => {
 		let toGreet = message.mentions.members?.first();
 		message.channel.send(`Hello there ${toGreet ? toGreet.user.username : message.member?.user.username}!`);

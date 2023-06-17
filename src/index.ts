@@ -22,7 +22,10 @@ if (!process.env.SAUCENAO_API_KEY) logger.warn("WARNING!!! SauceNao API key is n
 
 	// Create client with all the configs and store custom properties
 	const client = new Client({
-		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers],
+		intents: Object.keys(GatewayIntentBits).map((a) => {
+			// @ts-ignore
+			return GatewayIntentBits[a];
+		}),
 		partials: [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction], // cache partials
 		allowedMentions: { parse: ["users", "roles"], repliedUser: true },
 	});

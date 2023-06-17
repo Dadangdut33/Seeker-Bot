@@ -11,6 +11,7 @@ export interface ISlashCommand {
 
 export interface ICommand {
 	name: string;
+	description: string;
 	execute: (message: Message, args: Array<string>) => void;
 	permissions: Array<PermissionResolvable>;
 	aliases: Array<string>;
@@ -46,6 +47,10 @@ export interface AuditWatch_I {
 }
 
 export interface IAuditWatchMongo extends mongoose.Document {}
+
+export interface IanyDB {
+	[key: string]: any;
+}
 
 // ------------------ Global ------------------
 declare global {
