@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@discordjs/rest": "^1.1.0",
 		"@discordjs/voice": "^0.16.0",
+		"@types/pluralize": "^0.0.29",
 		"adhan": "^4.4.3",
 		"all-the-cities": "^3.1.0",
 		"animequotes": "^2.0.0",
@@ -48,7 +49,6 @@
 		"owoify-js": "^2.0.0",
 		"play-dl": "^1.9.6",
 		"pluralize": "^8.0.0",
-		"pretty-ms": "^8.0.0",
 		"rss-parser": "^3.13.0",
 		"string-progressbar": "^1.0.4",
 		"stutterify": "^2.2.0",

@@ -32,6 +32,7 @@ const event: IBotEvent = {
 				await deleteOne_model(GuildModel, { guildID: guild.guildID }).catch((e) => logger.error(e));
 			}
 		});
+		logger.info("🧹 Done!");
 
 		// add guilds that are not in the db
 		logger.info("📥 Adding guilds preferences... (if any)");
@@ -52,6 +53,7 @@ const event: IBotEvent = {
 				client.guildPreferences.set(guildID, new_guild);
 			}
 		});
+		logger.info("📥 Done!");
 	},
 };
 

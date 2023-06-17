@@ -67,7 +67,10 @@ let EXPRESSION_DOUBLE_SYLLABIC_ONE = new RegExp(
 	"g"
 );
 
-let EXPRESSION_DOUBLE_SYLLABIC_TWO = new RegExp(["creat(?!u)", "[^gq]ua[^auieo]", "[aeiou]{3}", "^(?:ia|mc|coa[dglx].)", "^re(app|es|im|us)", "(th|d)eist"].join("|"), "g");
+let EXPRESSION_DOUBLE_SYLLABIC_TWO = new RegExp(
+	["creat(?!u)", "[^gq]ua[^auieo]", "[aeiou]{3}", "^(?:ia|mc|coa[dglx].)", "^re(app|es|im|us)", "(th|d)eist"].join("|"),
+	"g"
+);
 
 let EXPRESSION_DOUBLE_SYLLABIC_THREE = new RegExp(
 	["[^aeiou]y[ae]", "[^l]lien", "riet", "dien", "iu", "io", "ii", "uen", "[aeilotu]real", "real[aeilotu]", "iell", "eo[^aeiou]", "[aeiou]y[aeiou]"].join("|"),
@@ -80,7 +83,9 @@ let EXPRESSION_DOUBLE_SYLLABIC_FOUR = /[^s]ia/;
 let EXPRESSION_SINGLE = new RegExp(
 	[
 		"^(?:" + ["un", "fore", "ware", "none?", "out", "post", "sub", "pre", "pro", "dis", "side", "some"].join("|") + ")",
-		"(?:" + ["ly", "less", "some", "ful", "ers?", "ness", "cians?", "ments?", "ettes?", "villes?", "ships?", "sides?", "ports?", "shires?", "[gnst]ion(?:ed|s)?"].join("|") + ")$",
+		"(?:" +
+			["ly", "less", "some", "ful", "ers?", "ness", "cians?", "ments?", "ettes?", "villes?", "ships?", "sides?", "ports?", "shires?", "[gnst]ion(?:ed|s)?"].join("|") +
+			")$",
 	].join("|"),
 	"g"
 );
