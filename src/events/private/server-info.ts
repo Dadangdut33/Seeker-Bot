@@ -234,7 +234,6 @@ const event: IBotEvent = {
 				publicStage: "827086299051196426",
 			};
 
-		logger.debug(...Object.values(id_info));
 		if (!guildID) return logger.warn("guild or channel ID not set!");
 
 		const theGuild = client.guilds.cache.get(guildID);

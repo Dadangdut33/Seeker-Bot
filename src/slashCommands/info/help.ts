@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
 import { logger } from "../../logger";
 
-const command: ISlashCommand = {
+const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("help").setDescription("Get help of a command"),
 
 	execute: (interaction) => {
@@ -10,4 +10,4 @@ const command: ISlashCommand = {
 	},
 };
 
-export default command;
+export default slashCommands;

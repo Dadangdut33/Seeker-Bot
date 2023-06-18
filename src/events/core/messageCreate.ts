@@ -9,7 +9,7 @@ const event: IBotEvent = {
 	loadMsg: `👀 Module: 📨 ${__filename} loaded | Will handle prefix, cooldowns, crosspost, haiku, facebooklinks, and manga/anime search`,
 	execute: async (message: Message) => {
 		if (!message.member || message.member.user.bot) return;
-		if (!message.guild) return;
+		if (!message.guild) return; // Prevent DMs
 		let prefix = process.env.PREFIX;
 		if (mongoose.connection.readyState === 1) {
 			let guildPrefix = await getGuildOption(message.client, message.guild, "prefix");

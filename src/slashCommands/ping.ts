@@ -2,7 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { CUSTOM_COLORS } from "../utils";
 import { ISlashCommand } from "../types";
 
-const command: ISlashCommand = {
+const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("ping").setDescription("Shows the bot's ping"),
 	execute: async (interaction) => {
 		const msg = await interaction.reply({ embeds: [{ title: "🛰️ Pinging..." }] });
@@ -19,4 +19,4 @@ const command: ISlashCommand = {
 	},
 };
 
-export default command;
+export default slashCommands;

@@ -1,7 +1,7 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
 
-const ClearCommand: ISlashCommand = {
+const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("clear")
 		.setDescription("Deletes messages from the current channel.")
@@ -9,7 +9,7 @@ const ClearCommand: ISlashCommand = {
 			return option.setMaxValue(100).setMinValue(1).setName("messagecount").setDescription("Message amount to be cleared");
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
-
+	guildOnly: true,
 	execute: (interaction) => {
 		let messageCount = Number(interaction.options.get("messagecount")?.value);
 		interaction.channel?.messages.fetch({ limit: messageCount }).then(async (msgs) => {
@@ -22,4 +22,4 @@ const ClearCommand: ISlashCommand = {
 	},
 };
 
-export default ClearCommand;
+export default slashCommands;

@@ -2,7 +2,7 @@ import { SlashCommandBuilder, TextChannel, EmbedBuilder, ColorResolvable } from 
 import { ISlashCommand } from "../../types";
 import { logger } from "../../logger";
 
-const command: ISlashCommand = {
+const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("embed")
 		.setDescription("Create a new embed message.")
@@ -98,8 +98,9 @@ const command: ISlashCommand = {
 			return interaction.editReply({ content: "Embed message successfully sent." });
 		} catch (error) {
 			interaction.editReply({ content: "Something went wrong..." });
+			logger.error(`Error: ${error.message}`);
 		}
 	},
 };
 
-export default command;
+export default slashCommands;
