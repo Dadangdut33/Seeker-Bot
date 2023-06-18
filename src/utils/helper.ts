@@ -3,7 +3,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import chalk from "chalk";
 import moment from "moment-timezone";
-import { prettyMilliseconds } from "./prettyms";
+import { prettyMilliseconds } from "./locallib/prettyms";
 import { consoleColorType, CONSOLE_COLORS } from "./constants";
 
 export const logColor = (color: consoleColorType, message: any) => {
@@ -33,26 +33,6 @@ export const sendTimedMessage = (message: string, channel: TextChannel, duration
 
 export const walkdir = (directory: string): string[] => {
 	return readdirSync(directory, { withFileTypes: true }).flatMap((file) => (file.isDirectory() ? walkdir(join(directory, file.name)) : join(directory, file.name)));
-};
-
-export const capitalizeFirstLetter = (myString: string) => {
-	return myString.charAt(0).toUpperCase() + myString.slice(1);
-};
-
-export const hasNumber = (myString: string) => {
-	return /\d/.test(myString);
-};
-
-export const hasEmoji = (myString: string) => {
-	return /(:[^:s]+:|<:[^:s]+:[0-9]+>|<a:[^:s]+:[0-9]+>)/g.test(myString);
-};
-
-export const hasLink = (myString: string) => {
-	return new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?").test(myString);
-};
-
-export const reverseString = (str: string) => {
-	return str.split("").reverse().join("");
 };
 
 export const toTitleCase = (str: string) => {

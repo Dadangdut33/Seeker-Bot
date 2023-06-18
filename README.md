@@ -12,7 +12,11 @@
 
 ## Installation
 
-Clone the repository then create a file named `.env` and fill it out accordingly to .env.example
+Clone the repository then create a file named `.env` and fill it out accordingly to [.env.example](./.env.example)
+
+## Useful Docs
+
+- [Awaiting interaction](https://discordjs.guide/message-components/interactions.html#awaiting-components)
 
 ## Attribution
 

@@ -4,7 +4,7 @@ import malScraper, { AnimeEpisodesDataModel } from "mal-scraper";
 import { logger } from "../../logger";
 import { find_colname, getGuildOption, insert_colname, updateOne_colname } from "../db";
 import { capitalizeFirstLetter, hasEmoji, hasLink, hasNumber } from "../index";
-import { detect, format } from "./detect-haiku/detect-haiku";
+import { detect, format } from "../locallib/detect-haiku/detect-haiku";
 
 export const crosspost = (message: Message) => {
 	try {

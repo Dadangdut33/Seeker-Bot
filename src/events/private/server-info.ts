@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 import { IBotEvent } from "../../types";
 import { logger } from "../../logger";
 import { OnlineUsers as onlineUsers, getEmoji, getMemberNewest, getMemberOldest, totalBots } from "../../utils/helper";
-import { prettyMilliseconds } from "../../utils/prettyms";
+import { prettyMilliseconds } from "../../utils/locallib/prettyms";
 
 const embedStats = (
 	client: Client,

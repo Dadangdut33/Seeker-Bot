@@ -1,6 +1,5 @@
 import {
 	SlashCommandBuilder,
-	CommandInteraction,
 	Collection,
 	PermissionResolvable,
 	Message,
@@ -8,6 +7,7 @@ import {
 	Interaction,
 	ClientEvents,
 	ButtonInteraction,
+	ChatInputCommandInteraction,
 } from "discord.js";
 import { Document } from "mongoose";
 
@@ -24,7 +24,7 @@ export interface ICommand {
 
 export interface ISlashCommand {
 	command: SlashCommandBuilder | any;
-	execute: (interaction: CommandInteraction) => void;
+	execute: (interaction: ChatInputCommandInteraction) => void;
 	guildOnly?: boolean;
 	autocomplete?: (interaction: AutocompleteInteraction) => void;
 	cooldown?: number; // in seconds
