@@ -2,7 +2,7 @@ import { Client, Routes, SlashCommandBuilder } from "discord.js";
 import { REST } from "@discordjs/rest";
 import { join } from "path";
 import { logColor, walkdir } from "../utils";
-import { ICommand, ISlashCommand } from "../types";
+import { IButtonCommand, ICommand, ISlashCommand } from "../types";
 import { logger } from "../logger";
 
 /**
@@ -14,7 +14,21 @@ module.exports = (client: Client) => {
 	const slashCommands: SlashCommandBuilder[] = [],
 		commands: ICommand[] = [],
 		slashCommandsDir = join(__dirname, "../slashCommands"),
-		commandsDir = join(__dirname, "../commands");
+		commandsDir = join(__dirname, "../commands"),
+		buttonCommandsDir = join(__dirname, "../buttonCommands");
+
+	// ------------------------------ //
+	logger.info(logColor("text", `🔥 Loading commands...`));
+	walkdir(commandsDir).forEach((file) => {
+		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
+		let command: ICommand = require(file).default;
+
+		if (!command) return logger.warn(logColor("warning", `Command ${logColor("variable", file)} is not a valid command`));
+		if (command.disabled) return; // check disabled
+
+		commands.push(command);
+		client.commands.set(command.name, command);
+	});
 
 	logger.info(logColor("text", `🔥 Loading slash commands...`));
 	walkdir(slashCommandsDir).forEach((file) => {
@@ -28,16 +42,15 @@ module.exports = (client: Client) => {
 		client.slashCommands.set(slashCommand.command.name, slashCommand);
 	});
 
-	logger.info(logColor("text", `🔥 Loading commands...`));
-	walkdir(commandsDir).forEach((file) => {
+	logger.info(logColor("text", `🔥 Loading button commands...`));
+	walkdir(buttonCommandsDir).forEach((file) => {
 		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let command: ICommand = require(file).default;
+		let buttonCommand: IButtonCommand = require(file).default;
 
-		if (!command) return logger.warn(logColor("warning", `Command ${logColor("variable", file)} is not a valid command`));
-		if (command.disabled) return; // check disabled
+		if (!buttonCommand) return logger.warn(logColor("warning", `Button command ${logColor("variable", file)} is not a valid button command`));
+		if (buttonCommand.disabled) return; // check disabled
 
-		commands.push(command);
-		client.commands.set(command.name, command);
+		client.buttonCommands.set(buttonCommand.id, buttonCommand);
 	});
 
 	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);

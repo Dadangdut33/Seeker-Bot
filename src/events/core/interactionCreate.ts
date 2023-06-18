@@ -1,5 +1,6 @@
 import { Interaction } from "discord.js";
 import { IBotEvent } from "../../types";
+import { logger } from "../../logger";
 
 const event: IBotEvent = {
 	name: "interactionCreate",
@@ -28,7 +29,12 @@ const event: IBotEvent = {
 			} else if (command.cooldown && !cooldown) {
 				interaction.client.cooldowns.set(`${interaction.commandName}-${interaction.user.username}`, Date.now() + command.cooldown * 1000);
 			}
-			command.execute(interaction);
+
+			try {
+				command.execute(interaction);
+			} catch (error) {
+				logger.error(error);
+			}
 		} else if (interaction.isAutocomplete()) {
 			const command = interaction.client.slashCommands.get(interaction.commandName);
 			if (!command) {

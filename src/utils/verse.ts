@@ -10,10 +10,14 @@ export const randomAyat = async () => {
 	let req_2 = await axios.get(`https://equran.id/api/v2/surat/${req_1.data.verse.verse_key.split(":")[0]}`);
 	if (req_2.data.status == "error") return null;
 
-	let req_3 = await axios.get(`https://equran.id/api/v2/tafsir/${req_1.data.verse.verse_key.split(":")[0]}`);
-	if (req_3.data.status == "error") return null;
+	return { 1: req_1.data.verse as IQuranComVerse, 2: req_2.data.data as IEquranIdSurah };
+};
 
-	return { 1: req_1.data.verse as IQuranComVerse, 2: req_2.data.data as IEquranIdSurah, 3: req_3.data.data as IEquranIdSurahTafsir };
+export const getTafsir = async (surah: number) => {
+	let req = await axios.get(`https://equran.id/api/v2/tafsir/${surah}`);
+	if (req.data.status == "error") return null;
+
+	return req.data.data as IEquranIdSurahTafsir;
 };
 
 export const embedRandomAyat = async () => {
@@ -54,4 +58,43 @@ export const embedRandomAyat = async () => {
 	];
 
 	return embedAyat;
+};
+
+export const embedTafsir = async (surah: number, ayat: number, title: boolean = false, full_info: boolean = false) => {
+	const data = await getTafsir(surah);
+	if (!data) return null;
+
+	const infoEmbed = [
+			new EmbedBuilder()
+				.setTitle(`Tafsir Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke ${ayat}`)
+				.setDescription(data.deskripsi)
+				.setFields([
+					{
+						name: "Surah nomor",
+						value: data.nomor.toString(),
+						inline: true,
+					},
+					{
+						name: "Jumlah ayat",
+						value: data.jumlahAyat.toString(),
+						inline: true,
+					},
+					{
+						name: "Turun di",
+						value: data.tempatTurun,
+						inline: true,
+					},
+				]),
+		],
+		dataTafsir = data.tafsir[ayat - 1].teks;
+
+	let start = 0,
+		end = 2048; // Cut it to 2048
+	for (let i = 0; i < dataTafsir.length / 2048; i++) {
+		infoEmbed.push(new EmbedBuilder().setDescription(dataTafsir.slice(start, end)));
+		start += 2048;
+		end += 2048;
+	}
+
+	return infoEmbed;
 };

@@ -1,16 +1,17 @@
-import { SlashCommandBuilder, CommandInteraction, Collection, PermissionResolvable, Message, AutocompleteInteraction } from "discord.js";
+import {
+	SlashCommandBuilder,
+	CommandInteraction,
+	Collection,
+	PermissionResolvable,
+	Message,
+	AutocompleteInteraction,
+	Interaction,
+	ClientEvents,
+	ButtonInteraction,
+} from "discord.js";
 import { Document } from "mongoose";
 
 // ------------------ Bot - DB ------------------
-export interface ISlashCommand {
-	command: SlashCommandBuilder | any;
-	execute: (interaction: CommandInteraction) => void;
-	guildOnly?: boolean;
-	autocomplete?: (interaction: AutocompleteInteraction) => void;
-	cooldown?: number; // in seconds
-	disabled?: boolean;
-}
-
 export interface ICommand {
 	name: string;
 	description: string;
@@ -21,8 +22,25 @@ export interface ICommand {
 	disabled?: boolean;
 }
 
+export interface ISlashCommand {
+	command: SlashCommandBuilder | any;
+	execute: (interaction: CommandInteraction) => void;
+	guildOnly?: boolean;
+	autocomplete?: (interaction: AutocompleteInteraction) => void;
+	cooldown?: number; // in seconds
+	disabled?: boolean;
+}
+
+export interface IButtonCommand {
+	id: string; // name is the id
+	execute: (interaction: ButtonInteraction, args: any) => void;
+	guildOnly?: boolean;
+	cooldown?: number;
+	disabled?: boolean;
+}
+
 export interface IBotEvent {
-	name: string;
+	name: keyof ClientEvents;
 	loadMsg?: string;
 	once?: boolean | false;
 	execute: (...args) => void;
@@ -152,7 +170,7 @@ export interface IEquranIdSurah {
 	tempatTurun: string;
 	arti: string;
 	deskripsi: string;
-	audioFull: IEquranIdAudio[];
+	audioFull: IEquranIdAudio;
 	ayat: IEquranIdAyat[];
 	suratSelanjutnya: IEquranIdNextPrev;
 	suratSebelumnya: IEquranIdNextPrev;
@@ -166,7 +184,7 @@ export interface IEquranIdSurahTafsir {
 	tempatTurun: string;
 	arti: string;
 	deskripsi: string;
-	audioFull: IEquranIdAudio[];
+	audioFull: IEquranIdAudio;
 	tafsir: IEquranIdTafsir[];
 	suratSelanjutnya: IEquranIdNextPrev;
 	suratSebelumnya: IEquranIdNextPrev;
@@ -195,6 +213,7 @@ declare module "discord.js" {
 	export interface Client {
 		slashCommands: Collection<string, ISlashCommand>;
 		commands: Collection<string, ICommand>;
+		buttonCommands: Collection<string, IButtonCommand>;
 		cooldowns: Collection<string, number>;
 		guildPreferences: Collection<string, IGuild>;
 	}

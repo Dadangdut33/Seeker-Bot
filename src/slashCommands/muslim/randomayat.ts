@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
 import { embedRandomAyat } from "../../utils/verse";
 import { logger } from "../../logger";
@@ -13,18 +13,14 @@ const slashCommands: ISlashCommand = {
 			return;
 		}
 
-		// add button to get the tafsir
-		const tafsirButton = {
-			type: 2,
-			style: 1,
-			label: "Tafsir",
-			custom_id: "tafsir",
-		};
+		// Surah number and ayat is in the title of the first embed with format like this [surah:number] xxx (xxx) - xxx
+		// get each of it
+		const surahNumber = data[0].data.title?.split(" ")[0].split(":")[0].replace("[", ""),
+			ayatNumber = data[0].data.title?.split(" ")[0].split(":")[1].replace("]", "");
 
-		const row = {
-			type: 1,
-			components: [tafsirButton],
-		};
+		// add button to get the tafsir
+		const tafsirButton = new ButtonBuilder().setCustomId(`tafsir-${surahNumber}:${ayatNumber}`).setStyle(1).setLabel("Tafsir");
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(tafsirButton);
 
 		interaction.reply({ embeds: data, components: [row] });
 	},

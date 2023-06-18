@@ -3,6 +3,7 @@ import { checkPermissions, getGuildOption, sendTimedMessage } from "../../utils"
 import { IBotEvent } from "../../types";
 import mongoose from "mongoose";
 import { crosspost, detectAnimeSearch, detectHaiku, detectMangaSearch } from "../../utils/events/listener";
+import { logger } from "../../logger";
 
 const event: IBotEvent = {
 	name: "messageCreate",
@@ -54,7 +55,11 @@ const event: IBotEvent = {
 			message.client.cooldowns.set(`${command.name}-${message.member.user.username}`, Date.now() + command.cooldown * 1000);
 		}
 
-		command.execute(message, args);
+		try {
+			command.execute(message, args);
+		} catch (error) {
+			logger.error(error);
+		}
 	},
 };
 
