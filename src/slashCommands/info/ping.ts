@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { CUSTOM_COLORS } from "../utils";
-import { ISlashCommand } from "../types";
+import { CUSTOM_COLORS } from "../../utils";
+import { ISlashCommand } from "../../types";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("ping").setDescription("Shows the bot's ping"),
@@ -12,7 +12,7 @@ const slashCommands: ISlashCommand = {
 				// prettier-ignore
 				new EmbedBuilder()
 					.setTitle( "🏓 Pong!")
-					.setDescription(`📶 Latency: ${Math.floor(msg.createdAt.getTime() - interaction.createdAt.getTime())}ms\n📡 API Latency: ${Math.round(interaction.client.ws.ping)}`)
+					.setDescription(`📶 Latency: \`${Math.floor(msg.createdAt.getTime() - interaction.createdAt.getTime())}ms\`\n📡 API Latency: \`${Math.round(interaction.client.ws.ping)}ms\``)
 					.setColor(CUSTOM_COLORS.Aqua),
 			],
 		});
