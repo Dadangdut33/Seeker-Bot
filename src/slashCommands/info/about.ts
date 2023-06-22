@@ -14,7 +14,8 @@ const slashCommands: ISlashCommand = {
 					.setThumbnail(interaction.client!.user!.displayAvatarURL())
 					.setDescription(`Seeker bot. Created for private use. Made by @dadangdut33`)
 					.addFields([
-						{ name: "TOTAL SERVERS/\nCHANNELS", value: `${interaction.client.guilds.cache.size}/${interaction.client.channels.cache.size}`, inline: true },
+						{ name: "TOTAL SERVERS", value: `${interaction.client.guilds.cache.size}`, inline: true },
+						{ name: "TOTAL CHANNELS", value: `${interaction.client.channels.cache.size}`, inline: true },
 						{ name: "TOTAL MEMBERS", value: `${interaction.client.users.cache.size}`, inline: true },
 						{ name: "ID", value: `${interaction.client.user.id}`, inline: true },
 						{ name: "UPTIME", value: `${prettyMilliseconds(interaction.client.uptime)}`, inline: true },

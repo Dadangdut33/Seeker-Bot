@@ -20,37 +20,52 @@ module.exports = (client: Client) => {
 	// ------------------------------ //
 	logger.info(logColor("text", `🔥 Loading commands...`));
 	walkdir(commandsDir).forEach((file) => {
-		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let command: ICommand = require(file).default;
+		try {
+			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
+			let command: ICommand = require(file).default;
 
-		if (!command) return logger.warn(logColor("warning", `Command ${logColor("variable", file)} is not a valid command`));
-		if (command.disabled) return; // check disabled
+			if (!command) return logger.warn(logColor("warning", `Command ${logColor("variable", file)} is not a valid command`));
+			if (command.disabled) return; // check disabled
 
-		commands.push(command);
-		client.commands.set(command.name, command);
+			commands.push(command);
+			client.commands.set(command.name, command);
+		} catch (error) {
+			logger.error(`Error in ${file}`);
+			logger.error(error);
+		}
 	});
 
 	logger.info(logColor("text", `🔥 Loading slash commands...`));
 	walkdir(slashCommandsDir).forEach((file) => {
-		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let slashCommand: ISlashCommand = require(file).default;
+		try {
+			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
+			let slashCommand: ISlashCommand = require(file).default;
 
-		if (!slashCommand) return logger.warn(logColor("warning", `Slash command ${logColor("variable", file)} is not a valid slash command`));
-		if (slashCommand.disabled) return; // check disabled
+			if (!slashCommand) return logger.warn(logColor("warning", `Slash command ${logColor("variable", file)} is not a valid slash command`));
+			if (slashCommand.disabled) return; // check disabled
 
-		slashCommands.push(slashCommand.command);
-		client.slashCommands.set(slashCommand.command.name, slashCommand);
+			slashCommands.push(slashCommand.command);
+			client.slashCommands.set(slashCommand.command.name, slashCommand);
+		} catch (error) {
+			logger.error(`Error in ${file}`);
+			logger.error(error);
+		}
 	});
 
 	logger.info(logColor("text", `🔥 Loading button commands...`));
 	walkdir(buttonCommandsDir).forEach((file) => {
-		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
-		let buttonCommand: IButtonCommand = require(file).default;
+		try {
+			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
+			let buttonCommand: IButtonCommand = require(file).default;
 
-		if (!buttonCommand) return logger.warn(logColor("warning", `Button command ${logColor("variable", file)} is not a valid button command`));
-		if (buttonCommand.disabled) return; // check disabled
+			if (!buttonCommand) return logger.warn(logColor("warning", `Button command ${logColor("variable", file)} is not a valid button command`));
+			if (buttonCommand.disabled) return; // check disabled
 
-		client.buttonCommands.set(buttonCommand.id, buttonCommand);
+			client.buttonCommands.set(buttonCommand.id, buttonCommand);
+		} catch (error) {
+			logger.error(`Error in ${file}`);
+			logger.error(error);
+		}
 	});
 
 	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);

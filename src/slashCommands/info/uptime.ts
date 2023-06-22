@@ -3,7 +3,7 @@ import { ISlashCommand } from "../../types";
 import { prettyMilliseconds } from "../../utils";
 
 const slashCommands: ISlashCommand = {
-	command: new SlashCommandBuilder().setName("about").setDescription("Get bot's uptime"),
+	command: new SlashCommandBuilder().setName("uptime").setDescription("Get bot's uptime"),
 
 	execute: (interaction) => {
 		interaction.reply({
@@ -11,7 +11,7 @@ const slashCommands: ISlashCommand = {
 				new EmbedBuilder()
 					.setColor("Random")
 					.addFields([
-						{ name: "Booted up on", value: `<t:${interaction.client.readyAt.getTime()}>`, inline: true },
+						{ name: "Booted up on", value: `<t:${interaction.client.readyAt.getMilliseconds()}>`, inline: true },
 						{ name: "Uptime", value: `${prettyMilliseconds(interaction.client.uptime)}`, inline: true },
 					])
 					.setTimestamp(),

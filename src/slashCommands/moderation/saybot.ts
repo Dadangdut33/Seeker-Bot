@@ -3,7 +3,7 @@ import { ISlashCommand } from "../../types";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
-		.setName("say")
+		.setName("saybot")
 		.setDescription("Make the bot say your message. Only usable by admin and mods")
 		.addStringOption((option) => option.setName("content").setDescription("Message to send").setRequired(true))
 		.addBooleanOption((option) => option.setName("embed").setDescription("Send as embed?").setRequired(false))

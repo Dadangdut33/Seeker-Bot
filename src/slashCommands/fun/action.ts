@@ -1,6 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { logger } from "../../logger";
 import { getAnimeImgURLV2 } from "../../utils/commands";
 
 const slashCommands: ISlashCommand = {

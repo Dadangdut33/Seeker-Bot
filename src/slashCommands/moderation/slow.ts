@@ -3,7 +3,7 @@ import { ISlashCommand } from "../../types";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
-		.setName("slowmode")
+		.setName("slow")
 		.setDescription("Set slowmode for the current channel. Only usable by admin and mods")
 		.addIntegerOption((option) =>
 			option.setName("duration").setDescription("Set to 0 to turn it off. The limit is 21600 (6 hours").setRequired(true).setMinValue(0).setMaxValue(21600)
