@@ -4,7 +4,7 @@ import { ISlashCommand } from "../../types";
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("clear")
-		.setDescription("Deletes messages from the current channel.")
+		.setDescription("Deletes messages from the current channel. Only usable by admin and mods")
 		.addIntegerOption((option) => {
 			return option.setMaxValue(100).setMinValue(1).setName("messagecount").setDescription("Message amount to be cleared");
 		})

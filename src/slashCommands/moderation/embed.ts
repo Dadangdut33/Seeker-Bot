@@ -5,7 +5,7 @@ import { logger } from "../../logger";
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("embed")
-		.setDescription("Create a new embed message.")
+		.setDescription("Create a new embed message. Only usable by admin and mods")
 		.addStringOption((option) => {
 			// prettier-ignore
 			return option
@@ -35,6 +35,7 @@ const slashCommands: ISlashCommand = {
         .setRequired(true)
         .setAutocomplete(true);
 		}),
+	guildOnly: true,
 	autocomplete: async (interaction) => {
 		try {
 			const focusedValue = interaction.options.getFocused();
