@@ -1,32 +1,19 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { logger } from "../../logger";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("tempconvert")
 		.setDescription("Convert temperature provided into Celcius (C), Fahrenheit (F), Reamur (R), and Kelvin (K)")
-		.addStringOption((option) => option.setName("unit").setDescription("Unit of the temperature").setRequired(true).setAutocomplete(true))
+		.addStringOption((option) =>
+			option
+				.setName("unit")
+				.setDescription("Unit of the temperature")
+				.setRequired(true)
+				.addChoices({ name: "Celcius", value: "c" }, { name: "Fahrenheit", value: "f" }, { name: "Reamur", value: "r" }, { name: "Kelvin", value: "k" })
+		)
 		.addNumberOption((option) => option.setName("temperature").setDescription("Temperature to convert").setRequired(true)),
-	autocomplete: async (interaction) => {
-		try {
-			const focusedValue = interaction.options.getFocused();
-			const choices = [
-				{ name: "Celcius", value: "c" },
-				{ name: "Fahrenheit", value: "f" },
-				{ name: "Reamur", value: "r" },
-				{ name: "Kelvin", value: "k" },
-			];
-			let filtered: { name: string; value: string }[] = [];
-			for (let i = 0; i < choices.length; i++) {
-				const choice = choices[i];
-				if (choice.name.includes(focusedValue)) filtered.push(choice);
-			}
-			await interaction.respond(filtered);
-		} catch (error) {
-			logger.error(`Error: ${error.message}`);
-		}
-	},
+
 	execute: async (interaction) => {
 		const unit = interaction.options.getString("unit")!;
 		const temperature = interaction.options.getNumber("temperature")!;

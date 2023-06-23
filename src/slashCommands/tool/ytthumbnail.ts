@@ -18,7 +18,7 @@ const slashCommands: ISlashCommand = {
 			sdDefault = `https://img.youtube.com/vi/${theID}/sddefault.jpg`, // Standard Definition
 			maxDefault = `https://img.youtube.com/vi/${theID}/maxresdefault.jpg`;
 
-		const msg = await interaction.reply(`Please wait... Video URL: \`${url}\``);
+		await interaction.deferReply();
 		const embed = new EmbedBuilder()
 			.setAuthor({ name: `Requested by ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL({ extension: "png", size: 2048 }) })
 			.setTitle(`Link Info`)
@@ -33,7 +33,7 @@ const slashCommands: ISlashCommand = {
 			.setColor("#FF0000")
 			.setTimestamp();
 
-		msg.edit({ content: "", embeds: [embed] });
+		await interaction.followUp({ content: "", embeds: [embed] });
 	},
 };
 

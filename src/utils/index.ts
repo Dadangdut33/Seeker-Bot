@@ -2,7 +2,6 @@ export * from "./commands";
 export * from "./constants";
 export * from "./db";
 export * from "./helper";
-export * from "./randomPuppy";
 export * from "./text";
 export * from "./verse";
 export * from "./locallib/fancyfies";

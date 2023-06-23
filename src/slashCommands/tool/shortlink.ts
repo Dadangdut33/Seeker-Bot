@@ -9,10 +9,11 @@ const slashCommands: ISlashCommand = {
 		.addStringOption((option) => option.setName("link").setDescription("Link to shorten").setRequired(true)),
 
 	execute: async (interaction) => {
+		await interaction.deferReply();
 		shortUrl.short(interaction.options.getString("link")!, function (err: any, url: string) {
-			if (err) return interaction.reply({ content: `Error: ${err}`, ephemeral: true });
+			if (err) return interaction.followUp({ content: `Error: ${err}`, ephemeral: true });
 
-			interaction.reply({
+			interaction.followUp({
 				embeds: [
 					new EmbedBuilder()
 						.setTitle(`Shortlink Created!`)

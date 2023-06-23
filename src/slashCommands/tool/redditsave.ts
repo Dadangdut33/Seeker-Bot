@@ -9,7 +9,7 @@ const slashCommands: ISlashCommand = {
 		.setDescription("Get media download links of a reddit post")
 		.addStringOption((option) => option.setName("content").setDescription("Reddit post link").setRequired(true)),
 	execute: async (interaction) => {
-		const msg = await interaction.reply({ content: "Fetching the download link...", fetchReply: true });
+		await interaction.deferReply();
 		const args = interaction.options.getString("content")!;
 		let link = `https://redditsave.com/info?url=${args}`,
 			ddl;
@@ -43,7 +43,7 @@ const slashCommands: ISlashCommand = {
 			.setColor("#FF4500")
 			.setTimestamp();
 
-		msg.edit({ embeds: [embed] });
+		await interaction.followUp({ embeds: [embed] });
 	},
 };
 

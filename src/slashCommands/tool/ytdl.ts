@@ -17,8 +17,7 @@ const slashCommands: ISlashCommand = {
 		const url = interaction.options.getString("url")!;
 		if (!validateURL(url)) return interaction.reply({ content: "Error! Please provide a valid youtube video URL.", ephemeral: true });
 
-		const msg = await interaction.reply(`Please wait... Video URL: \`${url}\``);
-
+		await interaction.deferReply();
 		let vFormat = await highestVideo(url);
 		let embed = new EmbedBuilder()
 			.setColor("Random")
@@ -37,7 +36,7 @@ const slashCommands: ISlashCommand = {
 			.setColor("#FF0000")
 			.setTimestamp();
 
-		msg.edit({ content: "", embeds: [embed] });
+		await interaction.followUp({ content: "", embeds: [embed] });
 	},
 };
 

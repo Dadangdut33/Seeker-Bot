@@ -98,6 +98,8 @@ const slashCommands: ISlashCommand = {
 			const target = interaction.options.getString("target");
 			let query = interaction.options.getString("query")!;
 
+			await interaction.deferReply();
+
 			const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source}&tl=${target}&dt=t&q=${encodeURI(query)}`;
 			const res = await axios.get(url);
 			const data = res.data;
@@ -109,7 +111,7 @@ const slashCommands: ISlashCommand = {
 				.setDescription(result ? result : "Fail to fetch!")
 				.setFooter({ text: `Via Google Translate` });
 
-			interaction.reply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
 			logger.error(`Error: ${error.message}`);
 		}

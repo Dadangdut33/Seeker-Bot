@@ -1,33 +1,19 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { logger } from "../../logger";
 import moment from "moment-timezone";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("timeconvert")
 		.setDescription("Convert timezone GMT (+/-)")
-		.addStringOption((option) => option.setName("notation-from").setDescription("+ or -").setRequired(true).setAutocomplete(true))
+		.addStringOption((option) =>
+			option.setName("notation-from").setDescription("+ or -").setRequired(true).addChoices({ name: "+", value: "+" }, { name: "-", value: "-" })
+		)
 		.addIntegerOption((option) => option.setName("timezone-from").setDescription("Timezone from").setRequired(true))
-		.addStringOption((option) => option.setName("notation-to").setDescription("+ or -").setRequired(true).setAutocomplete(true))
+		.addStringOption((option) =>
+			option.setName("notation-to").setDescription("+ or -").setRequired(true).addChoices({ name: "+", value: "+" }, { name: "-", value: "-" })
+		)
 		.addIntegerOption((option) => option.setName("timezone-to").setDescription("Timezone to").setRequired(true)),
-	autocomplete: async (interaction) => {
-		try {
-			const focusedValue = interaction.options.getFocused();
-			const choices = [
-				{ name: "+", value: "+" },
-				{ name: "-", value: "-" },
-			];
-			let filtered: { name: string; value: string }[] = [];
-			for (let i = 0; i < choices.length; i++) {
-				const choice = choices[i];
-				if (choice.name.includes(focusedValue)) filtered.push(choice);
-			}
-			await interaction.respond(filtered);
-		} catch (error) {
-			logger.error(`Error: ${error.message}`);
-		}
-	},
 	execute: async (interaction) => {
 		const args = [
 			interaction.options.getString("notation-from"),
