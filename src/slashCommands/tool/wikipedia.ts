@@ -5,23 +5,19 @@ import axios from "axios";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
-		.setName("translate")
-		.setDescription("Translate text using google translate. You can use it by query or by replying to a message.")
-		.addStringOption((option) => option.setName("target").setDescription("Target language code").setRequired(true).setAutocomplete(true))
-		.addStringOption((option) => option.setName("query").setDescription("Text to translate").setRequired(true))
-		.addStringOption((option) => option.setName("source").setDescription("Source language code").setAutocomplete(true)),
+		.setName("wikipedia")
+		.setDescription("Search Wikipedia for an article")
+		.addStringOption((option) => option.setName("language").setDescription("Wikipedia language").setRequired(true).setAutocomplete(true))
+		.addStringOption((option) => option.setName("query").setDescription("Article to search").setRequired(true)),
 
 	autocomplete: async (interaction) => {
 		try {
 			const focusedValue = interaction.options.getFocused(true);
 			const choices = [
-				// https://developers.google.com/admin-sdk/directory/v1/languages
-				{ name: "Auto", value: "auto" },
 				{ name: "Amharic", value: "am" },
 				{ name: "Arabic", value: "ar" },
 				{ name: "Basque", value: "eu" },
 				{ name: "Bengali", value: "bn" },
-				{ name: "Portuguese (Brazil)", value: "pt-BR" },
 				{ name: "Bulgarian", value: "bg" },
 				{ name: "Catalan", value: "ca" },
 				{ name: "Cherokee", value: "chr" },
@@ -29,8 +25,7 @@ const slashCommands: ISlashCommand = {
 				{ name: "Czech", value: "cs" },
 				{ name: "Danish", value: "da" },
 				{ name: "Dutch", value: "nl" },
-				{ name: "English (UK)", value: "en-GB" },
-				{ name: "English (US)", value: "en" },
+				{ name: "English", value: "en" },
 				{ name: "Estonian", value: "et" },
 				{ name: "Filipino", value: "fil" },
 				{ name: "Finnish", value: "fi" },
@@ -54,12 +49,12 @@ const slashCommands: ISlashCommand = {
 				{ name: "Marathi", value: "mr" },
 				{ name: "Norwegian", value: "no" },
 				{ name: "Polish", value: "pl" },
-				{ name: "Portuguese (Portugal)", value: "pt-PT" },
+				{ name: "Portuguese (Brazil)", value: "br" },
+				{ name: "Portuguese (Portugal)", value: "pt" },
 				{ name: "Romanian", value: "ro" },
 				{ name: "Russian", value: "ru" },
 				{ name: "Serbian", value: "sr" },
-				{ name: "Chinese (PRC)", value: "zh-CN" },
-				{ name: "Chinese (Taiwan)", value: "zh-TW" },
+				{ name: "Chinese", value: "zh" },
 				{ name: "Slovak", value: "sk" },
 				{ name: "Slovenian", value: "sl" },
 				{ name: "Spanish", value: "es" },
@@ -94,27 +89,39 @@ const slashCommands: ISlashCommand = {
 		}
 	},
 	execute: async (interaction) => {
+		const language = interaction.options.getString("language")!,
+			query = interaction.options.getString("query")!;
+
+		const footer = `Via ${language} Wikipedia`,
+			author = "© Wikipedia.org",
+			authorpic = "https://i.imgur.com/fnhlGh5.png",
+			authorlink = "https://id.wikipedia.org/",
+			url = `https://${language}.wikipedia.org/api/rest_v1/page/summary/`,
+			link = url + query.replace(/ /g, "_");
+
+		await interaction.deferReply();
 		try {
-			const source = interaction.options.getString("source") ?? "auto";
-			const target = interaction.options.getString("target");
-			let query = interaction.options.getString("query")!;
-
-			await interaction.deferReply();
-
-			const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source}&tl=${target}&dt=t&q=${encodeURI(query)}`;
-			const res = await axios.get(url);
-			const data = res.data;
-			const result = data[0][0][0];
+			const { data } = await axios.get(link);
 
 			let embed = new EmbedBuilder()
-				.setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ extension: "png", size: 2048 }) })
-				.setTitle(`${source} to ${target}`)
-				.setDescription(result ? result : "Fail to fetch!")
-				.setFooter({ text: `Via Google Translate` });
+				.setAuthor({ name: author, iconURL: authorpic, url: authorlink })
+				.setColor("Random")
+				.setDescription(`${data.extract}`)
+				.setFooter({ text: footer })
+				.setThumbnail(`${data.thumbnail ? data.thumbnail.source : ""}`)
+				.setTitle(`${data.title}`)
+				.setURL(`${data.content_urls.desktop.page}`)
+				.setTimestamp();
 
-			await interaction.editReply({ embeds: [embed] });
+			return interaction.editReply({ embeds: [embed] });
 		} catch (error) {
-			logger.error(`Error: ${error.message}`);
+			if (error.response.status === 403) return interaction.editReply("Wikipedia is down, try again later.");
+			if (error.response.status === 404) return interaction.editReply(`I couldn't find that article on Wikipedia or maybe you type it wrong?`);
+			else {
+				console.log(error);
+				// return message.channel.send(`Error ${error}`);
+				interaction.editReply(`Error ${error}`);
+			}
 		}
 	},
 };

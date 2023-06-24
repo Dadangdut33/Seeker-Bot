@@ -26,3 +26,17 @@ export const hasLink = (myString: string) => {
 export const reverseString = (str: string) => {
 	return str.split("").reverse().join("");
 };
+
+export const capitalizeTheFirstLetterOfEachWord = (words: string) => {
+	let separateWord = words.toLowerCase().split(" ");
+	for (let i = 0; i < separateWord.length; i++) {
+		separateWord[i] = separateWord[i].charAt(0).toUpperCase() + separateWord[i].substring(1);
+	}
+	return separateWord.join(" ");
+};
+
+export const toTitleCase = (str: string) => {
+	return str.replace(/\w\S*/g, function (txt) {
+		return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
+	});
+};

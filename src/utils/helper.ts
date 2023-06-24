@@ -1,4 +1,15 @@
-import { GuildMember, PermissionFlagsBits, PermissionResolvable, TextChannel, Guild } from "discord.js";
+import {
+	GuildMember,
+	PermissionFlagsBits,
+	PermissionResolvable,
+	TextChannel,
+	Guild,
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+} from "discord.js";
 import { readdirSync } from "fs";
 import { join } from "path";
 import chalk from "chalk";
@@ -33,12 +44,6 @@ export const sendTimedMessage = (message: string, channel: TextChannel, duration
 
 export const walkdir = (directory: string): string[] => {
 	return readdirSync(directory, { withFileTypes: true }).flatMap((file) => (file.isDirectory() ? walkdir(join(directory, file.name)) : join(directory, file.name)));
-};
-
-export const toTitleCase = (str: string) => {
-	return str.replace(/\w\S*/g, function (txt) {
-		return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
-	});
 };
 
 export const getEmoji = (guild: Guild) => {
@@ -82,4 +87,63 @@ export const getMemberOldest = (guild: Guild) => {
 			index++;
 			return `${index}. <t:${~~(moment(GuildMember.joinedAt).tz("Asia/Jakarta").valueOf() / 1000)}:R> <@${GuildMember.id}> (${prettyMilliseconds(age)})`;
 		});
+};
+
+export const convertToEpoch = (date: Date) => {
+	return Math.floor(date.getTime() / 1000);
+};
+
+export const embedInteractionWithBtnPaginator = async (
+	interaction: ChatInputCommandInteraction,
+	embeds: EmbedBuilder[],
+	timeout: number,
+	btns?: ActionRowBuilder<ButtonBuilder>
+) => {
+	// ------------------ //
+	if (!btns)
+		// Default Button
+		btns = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder().setCustomId("back").setLabel("Previous").setStyle(ButtonStyle.Secondary),
+			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
+			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
+		);
+	// ------------------ //
+	const calculateFooter = (index: number, cur_embed: EmbedBuilder) => {
+		if (cur_embed.toJSON().footer && cur_embed.toJSON().footer?.text) {
+			return cur_embed.toJSON().footer?.text + ` | Page ${index + 1}/${embeds.length}`;
+		} else {
+			return `Page ${index + 1}/${embeds.length}`;
+		}
+	};
+	// ------------------ //
+	const originalEmbed = embeds;
+	let index = 0,
+		closedManually = false;
+	const msg = await interaction.editReply({ embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [btns] });
+	const collector = msg.createMessageComponentCollector({ time: timeout });
+
+	collector.on("collect", async (i) => {
+		if (i.customId === "next") {
+			index++;
+			if (index >= embeds.length) index = 0;
+			await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+		} else if (i.customId === "back") {
+			index--;
+			if (index < 0) index = embeds.length - 1;
+			await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+		} else if (i.customId === "stop") {
+			await i.update({ embeds: [embeds[index]], components: [] });
+			closedManually = true;
+			collector.stop();
+		}
+	});
+
+	collector.on("end", async () => {
+		const footerEnd =
+			originalEmbed[index].toJSON().footer && originalEmbed[index].toJSON().footer?.text
+				? originalEmbed[index].toJSON().footer?.text + ` | ${closedManually ? "Page switcher closed" : "Page switcher closed due to timeout"}`
+				: `${closedManually ? "Page switcher closed" : "Page switcher closed due to timeout"}`;
+
+		await msg.edit({ embeds: [embeds[index].setFooter({ text: footerEnd })], components: [] });
+	});
 };
