@@ -7,6 +7,11 @@ export const autist_text = (text: string) => {
 		.join("");
 };
 
+export const getDomainName = (url: string) => {
+	let domain = url.split("/")[2];
+	return domain.replace(/^www\./, "");
+};
+
 export const capitalizeFirstLetter = (myString: string) => {
 	return myString.charAt(0).toUpperCase() + myString.slice(1);
 };

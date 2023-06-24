@@ -8,7 +8,7 @@ const slashCommands: ISlashCommand = {
 		.setName("translate")
 		.setDescription("Translate text using google translate. You can use it by query or by replying to a message.")
 		.addStringOption((option) => option.setName("target").setDescription("Target language code").setRequired(true).setAutocomplete(true))
-		.addStringOption((option) => option.setName("query").setDescription("Text to translate").setRequired(true))
+		.addStringOption((option) => option.setName("query-or-id").setDescription("Text to translate / message id to translate").setRequired(true))
 		.addStringOption((option) => option.setName("source").setDescription("Source language code").setAutocomplete(true)),
 
 	autocomplete: async (interaction) => {
@@ -97,9 +97,14 @@ const slashCommands: ISlashCommand = {
 		try {
 			const source = interaction.options.getString("source") ?? "auto";
 			const target = interaction.options.getString("target");
-			let query = interaction.options.getString("query")!;
+			let query = interaction.options.getString("query-or-id")!;
 
 			await interaction.deferReply();
+			try {
+				// check if query is an id
+				const message = await interaction.channel?.messages.fetch(query);
+				if (message) query = message.content;
+			} catch (error) {}
 
 			const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source}&tl=${target}&dt=t&q=${encodeURI(query)}`;
 			const res = await axios.get(url);
