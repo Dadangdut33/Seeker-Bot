@@ -39,25 +39,18 @@ const slashCommands: ISlashCommand = {
 		});
 
 		collector.on("collect", async (i) => {
-			try {
-				const reacted = i.customId;
-				const result = getResult(reacted, botChoice); // Get result from emojis and bot
-				interaction.editReply({ embeds: [new EmbedBuilder().setFields([{ name: result, value: `${reacted} vs ${botChoice}` }])], components: [] });
-			} catch (error) {
-				logger.error(error);
-			}
+			const reacted = i.customId;
+			const result = getResult(reacted, botChoice); // Get result from emojis and bot
+			interaction.editReply({ embeds: [new EmbedBuilder().setFields([{ name: result, value: `${reacted} vs ${botChoice}` }])], components: [] });
+			collector.stop();
 		});
 
-		collector.on("end", async (collected) => {
-			try {
-				if (collected.size === 0)
-					interaction.editReply({
-						embeds: [new EmbedBuilder().setTitle(`Game Aborted!`).setDescription(`User did not choose any emojis, so the game is aborted`)],
-						components: [],
-					});
-			} catch (error) {
-				logger.error(error);
-			}
+		collector.on("end", async (collected, reason) => {
+			if (reason === "time")
+				interaction.editReply({
+					embeds: [new EmbedBuilder().setTitle(`Game Aborted!`).setDescription(`User did not choose any emojis, so the game is aborted`)],
+					components: [],
+				});
 		});
 	},
 };
