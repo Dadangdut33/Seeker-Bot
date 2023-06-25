@@ -115,8 +115,8 @@ export const detectMangaSearch = async (message: Message, prefix: string) => {
 
 				if (!manga) return message.channel.send(`No results found for ${toSearch}.`);
 
-				const embed = malMangaEmbed(manga);
-				message.reply({ embeds: [embed] });
+				const res = malMangaEmbed(manga);
+				message.reply({ embeds: [res] });
 			} catch (error) {
 				logger.error(`[ERROR] [MangaSearch - Inside Search Loop] | ${error}`);
 				msg.delete();
@@ -152,7 +152,7 @@ export const detectAnimeSearch = async (message: Message, prefix: string) => {
 				msg.delete();
 				if (!data) return message.channel.send(`No results found for **${toSearch}**!`);
 
-				message.reply({ embeds: [data] });
+				message.reply({ embeds: [data.embed], components: [data.component] });
 			} catch (error) {
 				msg.delete();
 				logger.error(`[ERROR] [AnimeSearch - Inside Search Loop] | ${error}`);

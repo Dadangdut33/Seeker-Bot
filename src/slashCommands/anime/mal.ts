@@ -30,7 +30,7 @@ const slashCommands: ISlashCommand = {
 			interaction.editReply(`Searching for anime \`${query}\`...`);
 			const qRes = await malAnimeSearch(query);
 			if (!qRes) return interaction.editReply(`No result found for anime \`${query}\``);
-			return interaction.editReply({ embeds: [qRes] });
+			return interaction.editReply({ embeds: [qRes.embed], components: [qRes.component] });
 		} else {
 			interaction.editReply(`Searching for manga \`${query}\`...`);
 			const qRes = await malScraper.search.search("manga", { term: query, maxResults: 5 });
@@ -71,7 +71,7 @@ const slashCommands: ISlashCommand = {
 
 			collector.on("collect", async (m) => {
 				const choice = parseInt(m.customId.split("-")[2]);
-				interaction.editReply({ embeds: [malMangaEmbed(qRes[choice])], components: [] });
+				await interaction.editReply({ embeds: [malMangaEmbed(qRes[choice])] });
 				collector.stop();
 			});
 

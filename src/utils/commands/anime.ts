@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import malScraper, { AnimeEpisodesDataModel, MangaSearchModel } from "mal-scraper";
 
 export const checkIfStaff = (toBeCheck: string) => {
@@ -118,19 +118,8 @@ export const malAnimeSearch = async (query: string) => {
 				inline: false,
 			},
 			{
-				name: "❯\u2000Search Online",
-				// prettier-ignore
-				value: `•\u2000\[9Anime](https://9anime.to/filter?keyword=${data.title.replace(/ /g, "+")})\n•\u2000\[Zoro](https://zoro.to/search?keyword=${data.title.replace(/ /g,"+")})\n•\u2000\[Nyaa](https://nyaa.si/?f=0&c=0_0&q=${data.title.replace(/ /g,"+")})`,
-				inline: true,
-			},
-			{
 				name: "❯\u2000PV",
 				value: `${data.trailer ? `•\u2000\[Click Here!](${data.trailer})` : "No PV available."}`,
-				inline: true,
-			},
-			{
-				name: "❯\u2000MAL Link",
-				value: `•\u2000\[Click Title or Here](${data.url})`,
 				inline: true,
 			},
 		])
@@ -138,7 +127,23 @@ export const malAnimeSearch = async (query: string) => {
 		.setTimestamp()
 		.setThumbnail(data.picture ? data.picture : ``);
 
-	return embed;
+	const component = new ActionRowBuilder<ButtonBuilder>().addComponents(
+		new ButtonBuilder().setLabel("MyAnimeList").setStyle(ButtonStyle.Link).setURL(data.url),
+		new ButtonBuilder()
+			.setLabel("Search on 9Anime")
+			.setStyle(ButtonStyle.Link)
+			.setURL(`https://9anime.to/filter?keyword=${data.title.replace(/ /g, "+")}`),
+		new ButtonBuilder()
+			.setLabel("Search on Zoro")
+			.setStyle(ButtonStyle.Link)
+			.setURL(`https://zoro.to/search?keyword=${data.title.replace(/ /g, "+")}`),
+		new ButtonBuilder()
+			.setLabel("Search on Nyaa")
+			.setStyle(ButtonStyle.Link)
+			.setURL(`https://nyaa.si/?f=0&c=0_0&q=${data.title.replace(/ /g, "+")}`)
+	);
+
+	return { embed, component };
 };
 
 export const malMangaEmbed = (manga: MangaSearchModel) => {
@@ -178,14 +183,13 @@ export const malMangaEmbed = (manga: MangaSearchModel) => {
 				inline: true,
 			},
 			{
-				name: "❯\u2000Search Online",
-				// prettier-ignore
-				value: `•\u2000\[Mangadex](https://mangadex.org/titles?q=${manga.title.replace(/ /g, "+")})`,
+				name: "❯\u2000PV",
+				value: `${manga.video ? `[Click Here](${manga.video})` : "No PV available"}`,
 				inline: true,
 			},
 			{
-				name: "❯\u2000PV",
-				value: `${manga.video ? `[Click Here](${manga.video})` : "No PV available"}`,
+				name: "❯\u2000Search Online",
+				value: `•\u2000\[Mangadex](https://mangadex.org/titles?q=${manga.title.replace(/ /g, "+")})`,
 				inline: true,
 			},
 			{
