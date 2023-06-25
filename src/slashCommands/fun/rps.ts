@@ -1,6 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ComponentType } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { logger } from "../../logger";
 const chooseArr = ["🗻", "✂", "📰"];
 
 function getResult(me: any, clientChosen: string) {

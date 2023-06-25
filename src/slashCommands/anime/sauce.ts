@@ -19,23 +19,31 @@ const slashCommands: ISlashCommand = {
 
 		await interaction.deferReply();
 		try {
+			interaction.editReply(`**Checking arguments...**`);
 			if (!queryImageUrlOrId && !queryImage) return interaction.editReply(`**Please either provide an image (upload), image url, or message id**`);
-			if (queryImage) queryImageUrlOrId = queryImage;
-			else {
+			if (queryImage) {
+				interaction.editReply(`**Got image uploaded**`);
+				queryImageUrlOrId = queryImage;
+			} else {
 				try {
+					interaction.editReply(`**Checking if query is an id...**`);
 					// check if query is an id
 					const message = await interaction.channel?.messages.fetch(queryImageUrlOrId!);
 					if (message && message.attachments.size > 0) {
-						// if message contains an image
-						queryImageUrlOrId = message.attachments.first()!.url;
+						queryImageUrlOrId = message.attachments.first()!.url; // fetched msg id contains an image
+						interaction.editReply(`**Got image attachment from message id**`);
 					} else if (message && message.content) {
-						// else check if query is an url
+						// got fetched msg but no attachment. Check if the msg contains url
 						queryImageUrlOrId = message.content;
-						// regex match img url
+
+						// match img url
 						let regex = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp))/gi;
 						let match = regex.exec(queryImageUrlOrId);
-						if (match) queryImageUrlOrId = match[0];
-					}
+						if (match) {
+							queryImageUrlOrId = match[0];
+							interaction.editReply(`**Got image url from message id**`);
+						}
+					} else interaction.editReply(`**Query is not an id...**`);
 				} catch (error) {}
 			}
 
@@ -65,28 +73,52 @@ const slashCommands: ISlashCommand = {
 
 			const embed = new EmbedBuilder() // create embed
 				.setColor("#0096fa")
-				.setTitle(`🥫 Found ${results_array.length} results`)
-				.setDescription(`[See Full Result](${link.replace("output_type=2", "output_type=0")})`)
+				.setAuthor({
+					name: "SauceNao",
+					url: link.replace("output_type=2", "output_type=0"),
+					iconURL: "https://www.userlogos.org/files/logos/zoinzberg/SauceNAO_2.png",
+				})
+				.setTitle(`Found ${results_array.length} results`)
 				.setImage(queryImageUrlOrId)
-				.setFooter({ text: `Via SauceNao.com | Some results might be filtered.` });
+				.setFooter({ text: `Some results might be filtered.` });
 
 			if (results_array.length === 0)
 				embed.addFields([{ name: `No Result found`, value: `Results found has less than 50% similarity. You can check full result for more info.` }]); // no result found
 			else embed.addFields([{ name: `Top Result (${results_array[0][2]}%)`, value: `[${results_array[0][0]}](${results_array[0][1]})` }]); // add top result
 
 			// more than 1 result
-			if (results_array.length > 1)
-				embed.addFields([
-					{
-						name: `Other Results (Might not be accurate)`,
-						value: results_array
-							.slice(1, results_array.length)
-							.map((v) => `- [${v[0]} (${v[2]}%)](${v[1]})`)
-							.join("\n"),
-					},
-				]);
+			if (results_array.length > 1) {
+				// loop add 5 item per field
+				for (let i = 1; i < results_array.length; i += 5) {
+					embed.addFields([
+						{
+							name: `Other Results (Might not be accurate)`,
+							value: results_array
+								.slice(i, i + 5)
+								.map((v) => `- [${v[0]} (${v[2]}%)](${v[1]})`)
+								.join("\n"),
+						},
+					]);
+				}
+			}
 
-			return interaction.editReply({ embeds: [embed], content: "" });
+			return interaction.editReply({
+				embeds: [embed],
+				content: "",
+				components: [
+					{
+						type: 1,
+						components: [
+							{
+								type: 2,
+								label: "See Full Result",
+								style: 5,
+								url: link.replace("output_type=2", "output_type=0"),
+							},
+						],
+					},
+				],
+			});
 		} catch (error) {
 			console.log(error);
 			return interaction.editReply(`**Unexpected error: ${error}**`);
