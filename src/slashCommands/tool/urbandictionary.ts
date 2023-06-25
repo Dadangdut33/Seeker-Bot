@@ -42,7 +42,7 @@ const slashCommands: ISlashCommand = {
 					.setTitle(title);
 			});
 
-			embedInteractionWithBtnPaginator(interaction, display, 120 * 1000);
+			embedInteractionWithBtnPaginator(interaction, display, 2);
 		} catch (error) {
 			logger.error(`Error: ${error.message}`);
 			console.log(error);

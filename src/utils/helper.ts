@@ -9,6 +9,9 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	Message,
+	CacheType,
+	ComponentType,
 } from "discord.js";
 import { readdirSync } from "fs";
 import { join } from "path";
@@ -110,7 +113,7 @@ export const embedInteractionWithBtnPaginator = async (
 	// ------------------ //
 	const calculateFooter = (index: number, cur_embed: EmbedBuilder) => {
 		if (cur_embed.toJSON().footer && cur_embed.toJSON().footer?.text) {
-			return cur_embed.toJSON().footer?.text + ` | Page ${index + 1}/${embeds.length}`;
+			return `Page ${index + 1}/${embeds.length}` + cur_embed.toJSON().footer?.text;
 		} else {
 			return `Page ${index + 1}/${embeds.length}`;
 		}
@@ -120,7 +123,7 @@ export const embedInteractionWithBtnPaginator = async (
 	let index = 0,
 		closedManually = false;
 	const msg = await interaction.editReply({ embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [btns] });
-	const collector = msg.createMessageComponentCollector({ time: timeout });
+	const collector = msg.createMessageComponentCollector({ time: timeout * 1000 * 60 });
 
 	collector.on("collect", async (i) => {
 		if (i.customId === "next") {
@@ -146,4 +149,18 @@ export const embedInteractionWithBtnPaginator = async (
 
 		await msg.edit({ embeds: [embeds[index].setFooter({ text: footerEnd })], components: [] });
 	});
+};
+
+export const btnPrompter = async (msg: Message<boolean>, interaction: ChatInputCommandInteraction<CacheType>, timeout: number, senderOnly = true) => {
+	return msg
+		.awaitMessageComponent({
+			filter: senderOnly ? (args) => args.user.id == interaction.user.id : undefined,
+			time: timeout * 1000,
+			componentType: ComponentType.Button,
+			dispose: true,
+		})
+		.then((i) => {
+			i.deferUpdate();
+			return i.customId;
+		});
 };

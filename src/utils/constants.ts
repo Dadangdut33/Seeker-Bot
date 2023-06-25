@@ -1,3 +1,5 @@
+import path from "path";
+
 export const CUSTOM_COLORS = {
 	White: 0xffffff,
 	Aqua: 0x1abc9c,
@@ -19,3 +21,5 @@ export const CONSOLE_COLORS = {
 	important: "0xffffff",
 	warning: "#ff8e4d",
 };
+
+export const md_session_cache_location = path.join(__dirname, "..", ".MD_cache");

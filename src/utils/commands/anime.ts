@@ -19,7 +19,7 @@ export const malAnimeSearch = async (query: string) => {
 	else data.staff.forEach((staff) => animeStaff.push(`• ${staff.name} - ${staff.role ? staff.role : "-"}`));
 
 	if (!data.characters || data.characters.length === 0) animeChar = [`No characters for this anime have been added to this title.`];
-	else data.characters.forEach((char) => animeChar.push(`• ${char.name} (${char.role}) VA: ${char.seiyuu.name ? char.seiyuu.name : "-"}`));
+	else data.characters.forEach((char) => animeChar.push(`• ${char.name} (${char.role}) 🔊: ${char.seiyuu.name ? char.seiyuu.name : "-"}`));
 
 	// Sometimes the char is the staff so if the first array of each is the same
 	if (data.characters && data.characters[0] && data.staff && data.staff[0]) {
@@ -40,7 +40,7 @@ export const malAnimeSearch = async (query: string) => {
 			iconURL: data.picture,
 			url: data.url,
 		})
-		.setDescription(data.synopsis ? data.synopsis : "No synopsis available.")
+		.setDescription(data.synopsis ? (data.synopsis.length > 2048 ? data.synopsis.slice(0, 2045) + "..." : data.synopsis) : "No synopsis available.") // 2048 is the max
 		.setFields([
 			{
 				name: "Japanese Name",
@@ -117,11 +117,6 @@ export const malAnimeSearch = async (query: string) => {
 				value: `${animeChar.join("\n")}`,
 				inline: false,
 			},
-			{
-				name: "❯\u2000PV",
-				value: `${data.trailer ? `•\u2000\[Click Here!](${data.trailer})` : "No PV available."}`,
-				inline: true,
-			},
 		])
 		.setFooter({ text: `Via Myanimelist.net` })
 		.setTimestamp()
@@ -140,7 +135,12 @@ export const malAnimeSearch = async (query: string) => {
 		new ButtonBuilder()
 			.setLabel("Search on Nyaa")
 			.setStyle(ButtonStyle.Link)
-			.setURL(`https://nyaa.si/?f=0&c=0_0&q=${data.title.replace(/ /g, "+")}`)
+			.setURL(`https://nyaa.si/?f=0&c=0_0&q=${data.title.replace(/ /g, "+")}`),
+		new ButtonBuilder()
+			.setLabel(data.trailer ? "Promotional Video" : "PV not available")
+			.setStyle(ButtonStyle.Link)
+			.setURL(data.trailer ? data.trailer : "https://google.com")
+			.setDisabled(!data.trailer)
 	);
 
 	return { embed, component };
@@ -173,8 +173,8 @@ export const malMangaEmbed = (manga: MangaSearchModel) => {
 				inline: true,
 			},
 			{
-				name: `Start - End Date`,
-				value: `${manga.startDate ? manga.startDate.replace("-", "N/A") : "N/A"} - ${manga.endDate ? manga.endDate.replace("-", "N/A") : "N/A"}`,
+				name: `Start / End Date`,
+				value: `${manga.startDate ? manga.startDate : "-"} / ${manga.endDate ? manga.endDate : "-"}`,
 				inline: true,
 			},
 			{
@@ -182,25 +182,28 @@ export const malMangaEmbed = (manga: MangaSearchModel) => {
 				value: `${manga.members ?? "-"}`,
 				inline: true,
 			},
-			{
-				name: "❯\u2000PV",
-				value: `${manga.video ? `[Click Here](${manga.video})` : "No PV available"}`,
-				inline: true,
-			},
-			{
-				name: "❯\u2000Search Online",
-				value: `•\u2000\[Mangadex](https://mangadex.org/titles?q=${manga.title.replace(/ /g, "+")})`,
-				inline: true,
-			},
-			{
-				name: "❯\u2000MAL Link",
-				value: `•\u2000\[Click Title or Here](${manga.url})`,
-				inline: true,
-			},
 		])
 		.setFooter({ text: `Data Fetched From Myanimelist.net` })
 		.setTimestamp()
 		.setThumbnail(manga.thumbnail);
 
-	return embed;
+	const component = new ActionRowBuilder<ButtonBuilder>().addComponents(
+		new ButtonBuilder().setLabel("MyAnimeList").setStyle(ButtonStyle.Link).setURL(manga.url),
+
+		new ButtonBuilder()
+			.setLabel("Search on Mangadex")
+			.setStyle(ButtonStyle.Link)
+			.setURL(`https://mangadex.org/titles?q=${manga.title.replace(/ /g, "+")}`),
+		new ButtonBuilder()
+			.setLabel("Search on Nyaa")
+			.setStyle(ButtonStyle.Link)
+			.setURL(`https://nyaa.si/?f=0&c=3_0&q=${manga.title.replace(/ /g, "+")}`),
+		new ButtonBuilder()
+			.setLabel(manga.video ? "Promotional Video" : "PV not available")
+			.setStyle(ButtonStyle.Link)
+			.setURL(manga.video ? manga.video : "https://google.com")
+			.setDisabled(!manga.video)
+	);
+
+	return { embed, component };
 };

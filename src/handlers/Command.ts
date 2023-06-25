@@ -70,15 +70,19 @@ module.exports = (client: Client) => {
 
 	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-	rest
-		.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-			body: slashCommands.map((command) => command.toJSON()),
-		})
-		.then((data: any) => {
-			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
-			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
-		})
-		.catch((e) => {
-			logger.error(e);
-		});
+	try {
+		rest
+			.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+				body: slashCommands.map((command) => command.toJSON()),
+			})
+			.then((data: any) => {
+				logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
+				logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
+			})
+			.catch((e) => {
+				logger.error(e);
+			});
+	} catch (error) {
+		logger.error(error);
+	}
 };

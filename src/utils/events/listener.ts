@@ -116,7 +116,7 @@ export const detectMangaSearch = async (message: Message, prefix: string) => {
 				if (!manga) return message.channel.send(`No results found for ${toSearch}.`);
 
 				const res = malMangaEmbed(manga);
-				message.reply({ embeds: [res] });
+				message.reply({ embeds: [res.embed], components: [res.component] });
 			} catch (error) {
 				logger.error(`[ERROR] [MangaSearch - Inside Search Loop] | ${error}`);
 				msg.delete();

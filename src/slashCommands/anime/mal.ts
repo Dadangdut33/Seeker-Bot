@@ -1,6 +1,7 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
 import { malAnimeSearch, malMangaEmbed } from "../../utils/commands/anime";
+import { btnPrompter } from "../../utils";
 import malScraper from "mal-scraper";
 
 const slashCommands: ISlashCommand = {
@@ -30,12 +31,12 @@ const slashCommands: ISlashCommand = {
 			interaction.editReply(`Searching for anime \`${query}\`...`);
 			const qRes = await malAnimeSearch(query);
 			if (!qRes) return interaction.editReply(`No result found for anime \`${query}\``);
-			return interaction.editReply({ embeds: [qRes.embed], components: [qRes.component] });
+			return interaction.editReply({ content: "", embeds: [qRes.embed], components: [qRes.component] });
 		} else {
 			interaction.editReply(`Searching for manga \`${query}\`...`);
 			const qRes = await malScraper.search.search("manga", { term: query, maxResults: 5 });
 
-			if (!qRes || qRes.length === 0) return interaction.editReply(`No result found for manga \`${query}\``);
+			if (!qRes.length) return interaction.editReply(`No result found for manga \`${query}\``);
 
 			// ask to choose which manga
 			let options = [],
@@ -62,27 +63,20 @@ const slashCommands: ISlashCommand = {
 				.setTitle(`Please Choose The Manga That You Are Searching For Below`)
 				.setDescription(options.join("\n"));
 
-			const msg = await interaction.editReply({ embeds: [embedOption], components: [btnsRow] });
-			const collector = msg.createMessageComponentCollector({
-				filter: (args) => args.user.id == interaction.user.id,
-				time: 120 * 1000,
-				componentType: ComponentType.Button,
-			});
+			const msg = await interaction.editReply({ content: "", embeds: [embedOption], components: [btnsRow] });
+			const promptResult = await btnPrompter(msg, interaction, 120);
 
-			collector.on("collect", async (m) => {
-				const choice = parseInt(m.customId.split("-")[2]);
-				await interaction.editReply({ embeds: [malMangaEmbed(qRes[choice])] });
-				collector.stop();
-			});
+			if (!promptResult)
+				return interaction.editReply({
+					components: [],
+					content: "",
+					embeds: [new EmbedBuilder().setColor("NotQuiteBlack").setDescription("**Manga search cancelled** user did not choose any manga listed")],
+				});
 
-			collector.on("end", async (collected, reason) => {
-				if (reason == "time")
-					interaction.editReply({
-						components: [],
-						content: "",
-						embeds: [new EmbedBuilder().setColor("Red").setDescription("**Manga search cancelled** user did not choose any manga listed")],
-					});
-			});
+			const choice = parseInt(promptResult.split("-")[2]);
+			const res = malMangaEmbed(qRes[choice]);
+
+			interaction.editReply({ content: "", embeds: [res.embed], components: [res.component] });
 		}
 	},
 };
