@@ -22,4 +22,4 @@ export const CONSOLE_COLORS = {
 	warning: "#ff8e4d",
 };
 
-export const md_session_cache_location = path.join(__dirname, "..", ".MD_cache");
+export const md_session_cache_location = path.join(__dirname, "..", "..", ".MD_cache");

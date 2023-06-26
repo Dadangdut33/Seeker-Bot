@@ -44,8 +44,7 @@ const slashCommands: ISlashCommand = {
 
 			embedInteractionWithBtnPaginator(interaction, display, 2);
 		} catch (error) {
-			logger.error(`Error: ${error.message}`);
-			console.log(error);
+			logger.error(`${error}`);
 			return interaction.editReply(`Error! Please try again later.\n\`\`\`${error}\`\`\``);
 		}
 	},

@@ -90,7 +90,7 @@ const slashCommands: ISlashCommand = {
 
 			await interaction.respond(filtered);
 		} catch (error) {
-			logger.error(`Error: ${error.message}`);
+			logger.error(`${error}`);
 		}
 	},
 	execute: async (interaction) => {
@@ -119,7 +119,7 @@ const slashCommands: ISlashCommand = {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
-			logger.error(`Error: ${error.message}`);
+			logger.error(`${error}`);
 		}
 	},
 };

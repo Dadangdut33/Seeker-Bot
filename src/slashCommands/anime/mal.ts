@@ -70,7 +70,7 @@ const slashCommands: ISlashCommand = {
 				return interaction.editReply({
 					components: [],
 					content: "",
-					embeds: [new EmbedBuilder().setColor("NotQuiteBlack").setDescription("**Manga search cancelled** user did not choose any manga listed")],
+					embeds: [new EmbedBuilder().setColor("NotQuiteBlack").setDescription("**Manga search cancelled** user did not choose any of the manga listed")],
 				});
 
 			const choice = parseInt(promptResult.split("-")[2]);

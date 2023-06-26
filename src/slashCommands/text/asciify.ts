@@ -9,10 +9,10 @@ const slashCommands: ISlashCommand = {
 		.setDescription("Convert text to ASCII art using")
 		.addStringOption((option) => option.setName("text").setDescription("Text to convert").setRequired(true).setMaxLength(2000)),
 	execute: async (interaction) => {
-		figlet.text(interaction.options.getString("text")!, (err, data) => {
-			if (err) {
-				interaction.reply({ content: `Something went wrong...\n${err}`, ephemeral: true });
-				logger.error(err);
+		figlet.text(interaction.options.getString("text")!, (error, data) => {
+			if (error) {
+				interaction.reply({ content: `Something went wrong...\n${error}`, ephemeral: true });
+				logger.error(`${error}`);
 				return;
 			}
 

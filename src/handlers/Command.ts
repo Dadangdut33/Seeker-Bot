@@ -31,7 +31,7 @@ module.exports = (client: Client) => {
 			client.commands.set(command.name, command);
 		} catch (error) {
 			logger.error(`Error in ${file}`);
-			logger.error(error);
+			logger.error(`${error}`);
 		}
 	});
 
@@ -48,7 +48,7 @@ module.exports = (client: Client) => {
 			client.slashCommands.set(slashCommand.command.name, slashCommand);
 		} catch (error) {
 			logger.error(`Error in ${file}`);
-			logger.error(error);
+			logger.error(`${error}`);
 		}
 	});
 
@@ -64,25 +64,21 @@ module.exports = (client: Client) => {
 			client.buttonCommands.set(buttonCommand.id, buttonCommand);
 		} catch (error) {
 			logger.error(`Error in ${file}`);
-			logger.error(error);
+			logger.error(`${error}`);
 		}
 	});
 
 	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-	try {
-		rest
-			.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-				body: slashCommands.map((command) => command.toJSON()),
-			})
-			.then((data: any) => {
-				logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
-				logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
-			})
-			.catch((e) => {
-				logger.error(e);
-			});
-	} catch (error) {
-		logger.error(error);
-	}
+	rest
+		.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+			body: slashCommands.map((command) => command.toJSON()),
+		})
+		.then((data: any) => {
+			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
+			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
+		})
+		.catch((e) => {
+			logger.error(`${e}`);
+		});
 };

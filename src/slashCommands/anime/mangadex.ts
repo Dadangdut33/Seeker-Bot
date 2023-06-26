@@ -1,13 +1,13 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { btnPrompter, convertToEpoch, embedInteractionWithBtnPaginator, md_session_cache_location } from "../../utils";
+import { btnPrompter, convertToEpoch, embedInteractionWithBtnPaginator } from "../../utils";
 import { logger } from "../../logger";
 import { Manga, login, resolveArray } from "mangadex-full-api";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("mangadex")
-		.setDescription("Mangadex reader")
+		.setDescription("Mangadex reader. Search manga, get chapter list, and read chapter")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("list-chapter")
@@ -18,10 +18,17 @@ const slashCommands: ISlashCommand = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("read-chapter")
-				.setDescription("Read chapter")
+				.setDescription("Read chapter, must use the chapter number from list-chapter")
 				.addStringOption((option) => option.setName("query").setDescription("Manga title").setRequired(true))
 				.addIntegerOption((option) => option.setName("chapter").setDescription("Chapter number").setRequired(true).setMinValue(0))
-				.addBooleanOption((option) => option.setName("english-only").setDescription("English result only? (Default true)").setRequired(false))
+				.addBooleanOption((option) =>
+					option
+						.setName("english-only")
+						.setDescription(
+							"English result only? (Default true). Set it to false if you want to input the chapter number that you get from list-chapter when you search with english-only also set to false"
+						)
+						.setRequired(false)
+				)
 				.addBooleanOption((option) =>
 					option.setName("raw").setDescription("Send the results as plain image instead of as embed reader (Default false)").setRequired(false)
 				)
@@ -32,11 +39,10 @@ const slashCommands: ISlashCommand = {
 			const command = interaction.options.getSubcommand();
 			const query = interaction.options.getString("query", true);
 
-			interaction.deferReply();
 			const username = process.env.Mangadex_Username!;
 			const password = process.env.Mangadex_Password!;
-			// logger.debug(username, password, md_session_cache_location);
-			await login(username, password, md_session_cache_location);
+			await interaction.deferReply();
+			await login(username, password);
 
 			if (command === "list-chapter") {
 				const mangaList = await Manga.search(query);
@@ -88,20 +94,20 @@ const slashCommands: ISlashCommand = {
 					author = (await resolveArray(chosen.authors)).map((author) => author.name).join(", "),
 					volume = chosen.lastVolume,
 					chapterTotal = chosen.lastChapter,
-					// @ts-ignore
-					lastUpdate = moment(chosen.lastUpdate).tz("Asia/Jakarta").format("DD-MM-YY (HH:MM:SS)"),
+					lastUpdate = chosen.updatedAt,
 					link = `https://mangadex.org/title/${id}`;
 
 				// Get the manga's chapters:
 				let chapters = await chosen.getFeed(
-					{ order: { chapter: "asc", volume: "asc", createdAt: "asc", updatedAt: "asc", publishAt: "asc" }, translatedLanguage: englishOnly ? ["en"] : undefined },
+					{ order: { chapter: "asc", volume: "asc", createdAt: "asc", updatedAt: "asc", publishAt: "asc" }, translatedLanguage: englishOnly ? ["en"] : [] },
 					true
 				);
 
 				if (chapters.length == 0) return interaction.editReply({ content: `No chapter found for \`${title}\``, embeds: [], components: [] });
 
 				// get the chapter
-				let loop = Math.ceil(chapters.length / 30), // get how many loop, limit chapters shown to 30 per embed
+				const perEmbed = 20;
+				let loop = Math.ceil(chapters.length / perEmbed), // get how many loop, limit chapters shown to 20 per embed
 					embedChapterLists = [];
 
 				// verify total chapter and volume
@@ -112,24 +118,24 @@ const slashCommands: ISlashCommand = {
 					embedChapterLists[i] = new EmbedBuilder()
 						.setColor("#e6613e")
 						.setAuthor({
-							name: `${title} - ${chapterTotal} Chapter ${volume ? `(${volume} Volume)` : ``} | ${originLang} - en`,
+							name: `${title} - ${chapterTotal} Chapter ${volume ? `(${volume} Volume)` : ``} | ${originLang} ${englishOnly ? "- en" : "- all"}`,
 							iconURL: `https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png`,
 							url: link,
 						})
 						.setThumbnail(cover)
 						.setDescription(
 							chapters
-								.map((chapter, index) => `**${index + 1}**. Ch ${chapter.chapter} ${chapter.title ? `- ${chapter.title}` : ``}`)
-								.slice(i * 30, (i + 1) * 30)
+								.map((chapter, index) => `**${index + 1}**. Ch ${chapter.chapter} ${chapter.title ? `- ${chapter.title}` : ``} [${chapter.translatedLanguage}]`)
+								.slice(i * perEmbed, (i + 1) * perEmbed)
 								.join("\n")
 						)
 						.addFields([
 							{ name: "Artist", value: artist, inline: true },
 							{ name: "Author", value: author, inline: true },
-							{ name: "Last update", value: lastUpdate, inline: true },
+							{ name: "Last update", value: `<t:${convertToEpoch(lastUpdate)}>`, inline: true },
 							{ name: "Link", value: `[Mangadex](${link}) | [MAL](https://myanimelist.net/manga.php?q=${title.replace(/ /g, "%20")}&cat=manga)`, inline: true },
 						])
-						.setFooter({ text: `Via Mangadex.org - Use the bold number for input to read the chapter` });
+						.setFooter({ text: ` | Via Mangadex.org - Use the bold number for input to read the chapter` });
 				}
 
 				// send the embed in paginator
@@ -154,7 +160,7 @@ const slashCommands: ISlashCommand = {
 					link = `https://mangadex.org/title/${id}`,
 					// Get the manga's chapters:
 					chapters = await manga.getFeed(
-						{ order: { chapter: "asc", volume: "asc", createdAt: "asc", updatedAt: "asc", publishAt: "asc" }, translatedLanguage: englishOnly ? ["en"] : undefined },
+						{ order: { chapter: "asc", volume: "asc", createdAt: "asc", updatedAt: "asc", publishAt: "asc" }, translatedLanguage: englishOnly ? ["en"] : [] },
 						true
 					);
 
@@ -169,7 +175,7 @@ const slashCommands: ISlashCommand = {
 				let chGet = chapters[chapter - 1],
 					pages = await chGet.getReadablePages();
 
-				interaction.editReply(`Found manga titled: \`${manga.title}\`\n\nRetrieving ${pages.length} pages from chapter ${chapter} **please wait...**`);
+				await interaction.editReply(`Found manga titled: \`${manga.title}\`\n\nRetrieving ${pages.length} pages from chapter ${chapter} **please wait...**`);
 
 				// Get uploader and grup names
 				let uploader = await chGet.uploader.resolve(),
@@ -181,7 +187,7 @@ const slashCommands: ISlashCommand = {
 						embedChaptersReader[i] = new EmbedBuilder()
 							.setColor("#e6613e")
 							.setAuthor({
-								name: `${title} - Chapter ${chGet.chapter} | ${originLang} - en`,
+								name: `${title} - Chapter ${chGet.chapter} | ${originLang} - ${chGet.translatedLanguage}`,
 								iconURL: `https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png`,
 								url: `https://mangadex.org/chapter/${chGet.id}/`,
 							})
@@ -196,7 +202,7 @@ const slashCommands: ISlashCommand = {
 								{ name: "Raw", value: `[Click here](${pages[i]})`, inline: true },
 								{ name: "Search on", value: `[MAL](https://myanimelist.net/manga.php?q=${title.replace(/ /g, "%20")}&cat=manga)`, inline: true },
 							])
-							.setFooter({ text: ` | Uploaded by ${uploader.username} | Scanlated by ${groupNames} | Via Mangadex.org` });
+							.setFooter({ text: ` | Uploaded by ${uploader.username} | Scanlated by ${groupNames}` });
 					}
 
 					// send the embed in paginator
@@ -206,7 +212,7 @@ const slashCommands: ISlashCommand = {
 					let embed = new EmbedBuilder()
 						.setColor("#e6613e")
 						.setAuthor({
-							name: `${title} - Chapter ${chGet.chapter} | ${originLang} - en`,
+							name: `${title} - Chapter ${chGet.chapter} | ${originLang} - ${chGet.translatedLanguage}`,
 							iconURL: `https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png`,
 							url: `https://mangadex.org/chapter/${chGet.id}/`,
 						})
@@ -219,9 +225,9 @@ const slashCommands: ISlashCommand = {
 							{ name: "Uploaded At", value: `<t:${convertToEpoch(chGet.publishAt)}>`, inline: true },
 							{ name: "Search on", value: `[MAL](https://myanimelist.net/manga.php?q=${title.replace(/ /g, "%20")}&cat=manga)`, inline: true },
 						])
-						.setFooter({ text: `RAW Mode | Uploaded by ${uploader.username} | Scanlated by ${groupNames} | Via Mangadex.org` });
+						.setFooter({ text: `RAW Mode | Uploaded by ${uploader.username} | Scanlated by ${groupNames}` });
 
-					interaction.editReply({ content: `**Loading finished! Please wait for all the raw chapter to be send**`, embeds: [embed] });
+					interaction.editReply({ content: ``, embeds: [embed] });
 
 					// send raw
 					// max image in 1 message is 10, so get how much loop first
@@ -243,15 +249,23 @@ const slashCommands: ISlashCommand = {
 
 				// check for any offset
 				if (chapter !== parseInt(chGet.chapter))
-					interaction.followUp(
-						`**Offset detected!** There seems to be an offset of ${
-							chapter - parseInt(chGet.chapter)
-						} chapter(s), between the searched chapter and the result received from the API.\n**Please use the \`list-chapter\` command to get chapter lists and read the correct chapter**`
-					);
+					interaction.followUp({
+						embeds: [
+							new EmbedBuilder()
+								.setColor("#e6613e")
+								.setTitle("Offset Detected!")
+								.setDescription(
+									`There seems to be an offset of ${
+										chapter - parseInt(chGet.chapter)
+									} chapter(s), between the searched chapter and the result received from the API.\n**Please use the \`list-chapter\` command to get chapter lists if you think the query is wrong to read the correct chapter**`
+								),
+						],
+						ephemeral: true,
+					});
 			}
 		} catch (error) {
-			logger.error(error);
-			interaction.editReply({ content: `An error occured while processing the command! ${error}` });
+			logger.error(`${error}`);
+			interaction.editReply({ content: `An error occured while processing the command! Details: \`${error}\`` });
 		}
 	},
 };

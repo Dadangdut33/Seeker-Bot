@@ -100,6 +100,7 @@ export const embedInteractionWithBtnPaginator = async (
 	interaction: ChatInputCommandInteraction,
 	embeds: EmbedBuilder[],
 	timeout: number,
+	content?: string,
 	btns?: ActionRowBuilder<ButtonBuilder>
 ) => {
 	// ------------------ //
@@ -113,16 +114,22 @@ export const embedInteractionWithBtnPaginator = async (
 	// ------------------ //
 	const calculateFooter = (index: number, cur_embed: EmbedBuilder) => {
 		if (cur_embed.toJSON().footer && cur_embed.toJSON().footer?.text) {
-			return `Page ${index + 1}/${embeds.length}` + cur_embed.toJSON().footer?.text;
+			// if already contains Page x/x return it
+			if (cur_embed.toJSON().footer?.text?.includes(`Page ${index + 1}/${embeds.length}`)) return cur_embed.toJSON().footer?.text!;
+			else return `Page ${index + 1}/${embeds.length}` + cur_embed.toJSON().footer?.text;
 		} else {
 			return `Page ${index + 1}/${embeds.length}`;
 		}
 	};
 	// ------------------ //
-	const originalEmbed = embeds;
+	const originalEmbed = embeds.map((embed) => embed); // copy it in new array
 	let index = 0,
 		closedManually = false;
-	const msg = await interaction.editReply({ embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [btns] });
+	const msg = await interaction.editReply({
+		content: content ? content : "",
+		embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+		components: [btns],
+	});
 	const collector = msg.createMessageComponentCollector({ time: timeout * 1000 * 60 });
 
 	collector.on("collect", async (i) => {
@@ -162,5 +169,8 @@ export const btnPrompter = async (msg: Message<boolean>, interaction: ChatInputC
 		.then((i) => {
 			i.deferUpdate();
 			return i.customId;
+		})
+		.catch(() => {
+			return null;
 		});
 };
