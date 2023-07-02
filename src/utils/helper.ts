@@ -99,7 +99,7 @@ export const convertToEpoch = (date: Date) => {
 interface embedPaginator_optional {
 	content?: string | null | undefined;
 	btns?: ActionRowBuilder<ButtonBuilder> | null | undefined;
-	components_function?: ((index: number) => ActionRowBuilder<ButtonBuilder>) | null | undefined;
+	components_function?: ((index: number) => ActionRowBuilder<ButtonBuilder> | null) | null | undefined;
 }
 export const embedInteractionWithBtnPaginator = async (
 	interaction: ChatInputCommandInteraction,
@@ -107,14 +107,6 @@ export const embedInteractionWithBtnPaginator = async (
 	timeout: number,
 	{ content, btns, components_function }: embedPaginator_optional = {}
 ) => {
-	// ------------------ //
-	if (!btns)
-		// Default Button
-		btns = new ActionRowBuilder<ButtonBuilder>().addComponents(
-			new ButtonBuilder().setCustomId("back").setLabel("Previous").setStyle(ButtonStyle.Secondary),
-			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
-			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
-		);
 	// ------------------ //
 	const calculateFooter = (index: number, cur_embed: EmbedBuilder) => {
 		if (cur_embed.toJSON().footer && cur_embed.toJSON().footer?.text) {
@@ -126,22 +118,33 @@ export const embedInteractionWithBtnPaginator = async (
 		}
 	};
 	// ------------------ //
-	const originalEmbed = embeds.map((embed) => embed); // copy it in new array
+	// Default Button
+	if (!btns)
+		btns = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder().setCustomId("back").setLabel("Previous").setStyle(ButtonStyle.Secondary),
+			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
+			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
+		);
+	// ------------------ //
 	let index = 0,
 		closedManually = false;
-	const msg = await interaction.editReply({
-		content: content ? content : "",
-		embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
-		components: [btns],
-	});
-	const collector = msg.createMessageComponentCollector({ time: timeout * 1000 * 60 });
+	const originalEmbed = embeds.map((embed) => embed), // copy it in new array
+		msg = await interaction.editReply({
+			content: content ? content : "",
+			embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+			components: [btns],
+		}),
+		collector = msg.createMessageComponentCollector({ time: timeout * 1000 * 60 });
 
 	collector.on("collect", async (i) => {
 		if (i.customId === "next") {
 			index++;
 			if (index >= embeds.length) index = 0;
 			if (components_function) {
-				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [components_function(index)!] });
+				await i.update({
+					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+					components: [btns!, components_function(index)!],
+				});
 			} else {
 				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
 			}
@@ -149,7 +152,10 @@ export const embedInteractionWithBtnPaginator = async (
 			index--;
 			if (index < 0) index = embeds.length - 1;
 			if (components_function) {
-				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [components_function(index)!] });
+				await i.update({
+					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+					components: [btns!, components_function(index)!],
+				});
 			} else {
 				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
 			}

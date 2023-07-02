@@ -26,18 +26,16 @@ const slashCommands: ISlashCommand = {
 		}
 
 		const component_func = (index: number) => {
-			// ayat is located in the title of the embed with format like this Ayat ke-xxx
-			console.log(data[index].toJSON());
+			if (!data[index].toJSON().title) return null;
 
-			const ayat = data[index].toJSON().title?.split(" ")[2].replace("-", "");
+			// ayat is located in the title of the embed with format like this Ayat ke-xxx
+			const ayat = data[index].toJSON().title?.split("-")[1];
 			const tafsirButton = new ButtonBuilder().setCustomId(`tafsir-${surah}:${ayat}`).setStyle(1).setLabel("Tafsir");
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(tafsirButton);
 			return row;
 		};
 
-		await interaction.editReply({ embeds: [data[0]] });
-		// remove the first embed because it's the surah info
-		embedInteractionWithBtnPaginator(interaction, data.slice(1), 60, { components_function: component_func }); // 60 minutes
+		embedInteractionWithBtnPaginator(interaction, data, 60, { components_function: component_func }); // 60 minutes
 	},
 };
 

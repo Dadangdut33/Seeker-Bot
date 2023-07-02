@@ -151,7 +151,7 @@ export const embedSurah = async (surah: number, start?: number | null, end?: num
 		embedLists[0].setTitle(`Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke ${start} sampai ${end}`);
 	} else if (start && !end) {
 		// slice the start to the end of the data
-		ayatData = data.ayat.slice(start - 1);
+		ayatData = data.ayat.slice(start - 1, data.ayat.length);
 		embedLists[0].setTitle(`Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke ${start} sampai ${data.jumlahAyat}`);
 	} else if (!start && end) {
 		// slice the start to the end of the data
@@ -160,11 +160,11 @@ export const embedSurah = async (surah: number, start?: number | null, end?: num
 		embedLists[0].setTitle(`Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke 1 sampai ${end}`);
 	}
 
-	let toPush: EmbedBuilder[] = [];
 	ayatData.forEach((val, index) => {
+		let toPush: EmbedBuilder[] = [];
 		// set the ayat in description
-		let loop = Math.ceil(val.teksArab.length / 2048);
-		for (let i = 0; i < loop; i++) {
+		let firstLoop = Math.ceil(val.teksArab.length / 2048);
+		for (let i = 0; i < firstLoop; i++) {
 			toPush.push(
 				new EmbedBuilder()
 					.setAuthor({ name: `Q.S ${data.namaLatin} (${data.nama}) - ${data.arti}` })
@@ -174,38 +174,41 @@ export const embedSurah = async (surah: number, start?: number | null, end?: num
 		}
 
 		// latin loop
-		loop = Math.ceil(val.teksLatin.length / 1024);
-		for (let i = 0; i < loop; i++) {
-			// modify stored data in tempStore
-			toPush.forEach((tempVal, tempIndex) => {
-				toPush[tempIndex].addFields([
+		let loop = Math.ceil(val.teksLatin.length / 1024);
+
+		// also modify currently stored data in tempStore
+		for (let i = 0; i < toPush.length; i++) {
+			for (let j = 0; j < loop; j++) {
+				toPush[i].addFields([
 					{
-						name: tempIndex === 0 ? "Latin" : `Latin [${tempIndex + 2}]`,
-						value: val.teksLatin.slice(i * 1024, (i + 1) * 1024),
+						name: i === 0 ? "Latin" : `Latin [${i + 2}]`,
+						value: val.teksLatin.slice(j * 1024, (j + 1) * 1024),
 						inline: false,
 					},
 				]);
-			});
+			}
 		}
 
 		// artinya loop
 		loop = Math.ceil(val.teksIndonesia.length / 1024);
-		for (let i = 0; i < loop; i++) {
-			// modify stored data in tempStore
-			toPush.forEach((tempVal, tempIndex) => {
-				toPush[tempIndex].addFields([
+
+		// also modify currently stored data in tempStore
+		for (let i = 0; i < toPush.length; i++) {
+			for (let j = 0; j < loop; j++) {
+				toPush[i].addFields([
 					{
-						name: tempIndex === 0 ? "Artinya" : `Artinya [${tempIndex + 2}]`,
+						name: i === 0 ? "Artinya" : `Artinya [${i + 2}]`,
 						value: val.teksIndonesia.slice(i * 1024, (i + 1) * 1024),
 						inline: false,
 					},
 				]);
-			});
+			}
 		}
-	});
 
-	// add to embedLists
-	embedLists.push(...toPush);
+		// add to embedLists
+		embedLists.push(...toPush);
+		toPush = []; // reset
+	});
 
 	return embedLists;
 };
