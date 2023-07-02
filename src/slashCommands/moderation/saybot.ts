@@ -7,14 +7,14 @@ const slashCommands: ISlashCommand = {
 		.setDescription("Make the bot say your message. Only usable by admin and mods")
 		.addStringOption((option) => option.setName("content").setDescription("Message to send").setRequired(true))
 		.addBooleanOption((option) => option.setName("embed").setDescription("Send as embed?").setRequired(false))
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	guildOnly: true,
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDMPermission(false),
 	execute: async (interaction) => {
 		if (interaction.options.getBoolean("embed") === true) {
 			const embed = new EmbedBuilder()
 				.setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ extension: "jpg", size: 2048 }) })
 				.setDescription(interaction.options.getString("content")!)
-				.setColor("#000");
+				.setColor("NotQuiteBlack");
 
 			interaction.reply({ embeds: [embed] });
 		} else {

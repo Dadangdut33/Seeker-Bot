@@ -1,6 +1,6 @@
 import { logger } from "../../logger";
 import { IButtonCommand } from "../../types";
-import { embedTafsir } from "../../utils/verse";
+import { embedTafsir } from "../../utils/commands/verse";
 
 const command: IButtonCommand = {
 	id: "tafsir",

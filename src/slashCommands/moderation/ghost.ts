@@ -6,8 +6,8 @@ const slashCommands: ISlashCommand = {
 		.setName("ghost")
 		.setDescription("Ghost message. Only usable by admin and mods")
 		.addStringOption((option) => option.setName("content").setDescription("Ghost content").setRequired(true))
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	guildOnly: true,
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDMPermission(false),
 	execute: async (interaction) => {
 		const ghost = await interaction.reply({ content: interaction.options.getString("content")! });
 

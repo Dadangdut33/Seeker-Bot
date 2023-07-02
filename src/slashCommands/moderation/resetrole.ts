@@ -7,8 +7,8 @@ const slashCommands: ISlashCommand = {
 		.setName("resetrole")
 		.setDescription("Reset roles, only usable by admin and mods")
 		.addRoleOption((option) => option.setName("role").setDescription("Role to reset").setRequired(true))
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	guildOnly: true,
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDMPermission(false),
 	execute: async (interaction) => {
 		const roleToReset = interaction.options.getRole("role")!;
 		const guild = interaction.guild!;

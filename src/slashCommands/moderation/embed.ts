@@ -34,8 +34,8 @@ const slashCommands: ISlashCommand = {
         .setDescription("Select an option or type an hex color, for example: #000000")
         .setRequired(true)
         .setAutocomplete(true);
-		}),
-	guildOnly: true,
+		})
+		.setDMPermission(false),
 	autocomplete: async (interaction) => {
 		try {
 			const focusedValue = interaction.options.getFocused();

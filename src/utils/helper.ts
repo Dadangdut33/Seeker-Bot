@@ -96,12 +96,16 @@ export const convertToEpoch = (date: Date) => {
 	return Math.floor(date.getTime() / 1000);
 };
 
+interface embedPaginator_optional {
+	content?: string | null | undefined;
+	btns?: ActionRowBuilder<ButtonBuilder> | null | undefined;
+	components_function?: ((index: number) => ActionRowBuilder<ButtonBuilder>) | null | undefined;
+}
 export const embedInteractionWithBtnPaginator = async (
 	interaction: ChatInputCommandInteraction,
 	embeds: EmbedBuilder[],
 	timeout: number,
-	content?: string,
-	btns?: ActionRowBuilder<ButtonBuilder>
+	{ content, btns, components_function }: embedPaginator_optional = {}
 ) => {
 	// ------------------ //
 	if (!btns)
@@ -136,11 +140,19 @@ export const embedInteractionWithBtnPaginator = async (
 		if (i.customId === "next") {
 			index++;
 			if (index >= embeds.length) index = 0;
-			await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+			if (components_function) {
+				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [components_function(index)!] });
+			} else {
+				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+			}
 		} else if (i.customId === "back") {
 			index--;
 			if (index < 0) index = embeds.length - 1;
-			await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+			if (components_function) {
+				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })], components: [components_function(index)!] });
+			} else {
+				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+			}
 		} else if (i.customId === "stop") {
 			await i.update({ embeds: [embeds[index]], components: [] });
 			closedManually = true;

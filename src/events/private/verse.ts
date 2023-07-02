@@ -1,7 +1,7 @@
 import { Client, TextChannel } from "discord.js";
 import { IBotEvent } from "../../types";
 import { CronJob } from "cron";
-import { embedRandomAyat } from "../../utils/verse";
+import { embedRandomAyat } from "../../utils/commands/verse";
 import { logger } from "../../logger";
 
 const event: IBotEvent = {

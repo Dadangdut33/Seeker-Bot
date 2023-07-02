@@ -8,8 +8,8 @@ const slashCommands: ISlashCommand = {
 		.addIntegerOption((option) => {
 			return option.setMaxValue(100).setMinValue(1).setName("messagecount").setDescription("Message amount to be cleared");
 		})
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
-	guildOnly: true,
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+		.setDMPermission(false),
 	execute: (interaction) => {
 		let messageCount = Number(interaction.options.get("messagecount")?.value);
 		interaction.channel?.messages.fetch({ limit: messageCount }).then(async (msgs) => {

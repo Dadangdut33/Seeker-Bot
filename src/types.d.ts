@@ -25,7 +25,6 @@ export interface ICommand {
 export interface ISlashCommand {
 	command: SlashCommandBuilder | any;
 	execute: (interaction: ChatInputCommandInteraction) => void;
-	guildOnly?: boolean;
 	autocomplete?: (interaction: AutocompleteInteraction) => void;
 	cooldown?: number; // in seconds
 	disabled?: boolean;

@@ -1,14 +1,15 @@
 import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { embedRandomAyat } from "../../utils/verse";
+import { embedRandomAyat } from "../../utils/commands/verse";
 import { logger } from "../../logger";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("randomayat").setDescription("Get random ayat from the Quran using quran.com and equran.id API"),
 	execute: async (interaction) => {
+		await interaction.deferReply();
 		const data = await embedRandomAyat();
 		if (!data) {
-			interaction.reply({ content: "API Failed to respond on random ayat", ephemeral: true });
+			await interaction.editReply({ content: "API Failed to respond on random ayat" });
 			logger.error("API Failed to respond on random ayat");
 			return;
 		}
@@ -22,7 +23,7 @@ const slashCommands: ISlashCommand = {
 		const tafsirButton = new ButtonBuilder().setCustomId(`tafsir-${surahNumber}:${ayatNumber}`).setStyle(1).setLabel("Tafsir");
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(tafsirButton);
 
-		interaction.reply({ embeds: data, components: [row] });
+		interaction.editReply({ embeds: data, components: [row] });
 	},
 };
 

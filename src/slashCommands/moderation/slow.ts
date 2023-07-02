@@ -9,8 +9,8 @@ const slashCommands: ISlashCommand = {
 			option.setName("duration").setDescription("Set to 0 to turn it off. The limit is 21600 (6 hours").setRequired(true).setMinValue(0).setMaxValue(21600)
 		)
 		.addStringOption((option) => option.setName("reason").setDescription("Reason for the slowmode").setRequired(true))
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	guildOnly: true,
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDMPermission(false),
 	execute: async (interaction) => {
 		const channel = interaction.channel as TextChannel,
 			duration = interaction.options.getInteger("duration")!,

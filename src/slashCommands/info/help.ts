@@ -7,6 +7,7 @@ const slashCommands: ISlashCommand = {
 
 	execute: (interaction) => {
 		logger.info("help command");
+		interaction.reply({ content: "still WIP", ephemeral: true });
 	},
 };
 

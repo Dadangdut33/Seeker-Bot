@@ -7,8 +7,8 @@ const slashCommands: ISlashCommand = {
 		.setDescription("Delete someone's message. Only usable by admin and mods")
 		.addStringOption((option) => option.setName("id").setDescription("Message id to delete").setRequired(true))
 		.addStringOption((option) => option.setName("reason").setDescription("Reason for the deletion").setRequired(true))
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	guildOnly: true,
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDMPermission(false),
 	execute: async (interaction) => {
 		const id = interaction.options.getString("id")!,
 			reason = interaction.options.getString("reason")!; // reason to show in chat

@@ -10,11 +10,6 @@ const event: IBotEvent = {
 			let command = interaction.client.slashCommands.get(interaction.commandName);
 			let cooldown = interaction.client.cooldowns.get(`${interaction.commandName}-${interaction.user.username}`);
 			if (!command) return;
-			if (command.guildOnly && !interaction.guild) {
-				interaction.reply("I can't execute that command inside DMs!");
-				setTimeout(() => interaction.deleteReply(), 5000);
-				return;
-			}
 
 			if (command.cooldown && cooldown) {
 				if (Date.now() < cooldown) {
