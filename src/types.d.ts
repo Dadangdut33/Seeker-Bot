@@ -15,7 +15,7 @@ import { Document } from "mongoose";
 export interface ICommand {
 	name: string;
 	description: string;
-	execute: (message: Message, args: Array<string>) => void;
+	execute: (message: Message, args: Array<string>) => promise<void>;
 	permissions: Array<PermissionResolvable>;
 	aliases: Array<string>;
 	cooldown?: number;
@@ -24,7 +24,7 @@ export interface ICommand {
 
 export interface ISlashCommand {
 	command: SlashCommandBuilder | any;
-	execute: (interaction: ChatInputCommandInteraction) => void;
+	execute: (interaction: ChatInputCommandInteraction) => promise<void>;
 	autocomplete?: (interaction: AutocompleteInteraction) => void;
 	cooldown?: number; // in seconds
 	disabled?: boolean;
@@ -32,7 +32,7 @@ export interface ISlashCommand {
 
 export interface IButtonCommand {
 	id: string; // name is the id
-	execute: (interaction: ButtonInteraction, args: any) => void;
+	execute: (interaction: ButtonInteraction, args: any) => promise<void>;
 	guildOnly?: boolean;
 	cooldown?: number;
 	disabled?: boolean;

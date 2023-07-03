@@ -5,7 +5,7 @@ import { logger } from "../../logger";
 const event: IBotEvent = {
 	name: "interactionCreate",
 	loadMsg: `👀 Module: 📨 ${__filename} loaded`,
-	execute: (interaction: Interaction) => {
+	execute: async (interaction: Interaction) => {
 		if (interaction.isChatInputCommand()) {
 			let command = interaction.client.slashCommands.get(interaction.commandName);
 			let cooldown = interaction.client.cooldowns.get(`${interaction.commandName}-${interaction.user.username}`);
@@ -26,9 +26,9 @@ const event: IBotEvent = {
 			}
 
 			try {
-				command.execute(interaction);
+				await command.execute(interaction);
 			} catch (error) {
-				logger.error(error);
+				logger.error(`error executing command ${interaction.commandName}: ${error}`);
 			}
 		} else if (interaction.isAutocomplete()) {
 			const command = interaction.client.slashCommands.get(interaction.commandName);
@@ -40,7 +40,7 @@ const event: IBotEvent = {
 				if (!command.autocomplete) return;
 				command.autocomplete(interaction);
 			} catch (error) {
-				console.error(error);
+				logger.error(`error executing auto complete on command ${interaction.commandName}: ${error}`);
 			}
 		}
 	},

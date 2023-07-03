@@ -14,46 +14,50 @@ const event: IBotEvent = {
 	once: true,
 	loadMsg: `👀 Module: ⚙️ ${__filename} events loaded! | Storing guild preferences...`,
 	execute: async (client: Client) => {
-		logger.info("⚙️ Loading guilds preferences...");
-		const current_guilds_id_list = client.guilds.cache.map((guild) => guild.id);
-		const fetched_from_db = (await find_model(GuildModel, {})) as IGuild[];
-		fetched_from_db.forEach((res) => {
-			client.guildPreferences.set(res.guildID, res);
-		});
+		try {
+			logger.info("⚙️ Loading guilds preferences...");
+			const current_guilds_id_list = client.guilds.cache.map((guild) => guild.id);
+			const fetched_from_db = (await find_model(GuildModel, {})) as IGuild[];
+			fetched_from_db.forEach((res) => {
+				client.guildPreferences.set(res.guildID, res);
+			});
 
-		logger.debug(`📥 Fetched ${current_guilds_id_list.length} guilds from cache`);
-		logger.debug(`📥 Fetched ${fetched_from_db.length} guilds preferences from db`);
+			logger.debug(`📥 Fetched ${current_guilds_id_list.length} guilds from cache`);
+			logger.debug(`📥 Fetched ${fetched_from_db.length} guilds preferences from db`);
 
-		// clean db from guilds that are not in the cache (might be because of bot is kicked from the guild)
-		logger.info("🧹 Cleaning guilds preferences... (if any)");
-		fetched_from_db.forEach(async (guild) => {
-			if (!current_guilds_id_list.includes(guild.guildID)) {
-				logger.debug(`🗑️ Guild ${guild.guildID} is not in the cache, deleting from db...`);
-				await deleteOne_model(GuildModel, { guildID: guild.guildID }).catch((e) => logger.error(e));
-			}
-		});
-		logger.info("🧹 Done!");
+			// clean db from guilds that are not in the cache (might be because of bot is kicked from the guild)
+			logger.info("🧹 Cleaning guilds preferences... (if any)");
+			fetched_from_db.forEach(async (guild) => {
+				if (!current_guilds_id_list.includes(guild.guildID)) {
+					logger.debug(`🗑️ Guild ${guild.guildID} is not in the cache, deleting from db...`);
+					await deleteOne_model(GuildModel, { guildID: guild.guildID }).catch((e) => logger.error(e));
+				}
+			});
+			logger.info("🧹 Done!");
 
-		// add guilds that are not in the db
-		logger.info("📥 Adding guilds preferences... (if any)");
-		current_guilds_id_list.forEach(async (guildID) => {
-			if (!client.guildPreferences.has(guildID)) {
-				logger.debug(`📥 Guild ${guildID} is not in the db, adding...`);
-				// if not in db
-				const joinedAt = client.guilds.cache.get(guildID)?.joinedAt || new Date();
-				const new_guild: IGuild = {
-					guildID: guildID,
-					joinedAt: joinedAt,
-					options: {
-						prefix: process.env.PREFIX,
-					},
-				};
+			// add guilds that are not in the db
+			logger.info("📥 Adding guilds preferences... (if any)");
+			current_guilds_id_list.forEach(async (guildID) => {
+				if (!client.guildPreferences.has(guildID)) {
+					logger.debug(`📥 Guild ${guildID} is not in the db, adding...`);
+					// if not in db
+					const joinedAt = client.guilds.cache.get(guildID)?.joinedAt || new Date();
+					const new_guild: IGuild = {
+						guildID: guildID,
+						joinedAt: joinedAt,
+						options: {
+							prefix: process.env.PREFIX,
+						},
+					};
 
-				await insert_model(GuildModel, new_guild).catch((e) => logger.error(e));
-				client.guildPreferences.set(guildID, new_guild);
-			}
-		});
-		logger.info("📥 Done!");
+					await insert_model(GuildModel, new_guild).catch((e) => logger.error(e));
+					client.guildPreferences.set(guildID, new_guild);
+				}
+			});
+			logger.info("📥 Done!");
+		} catch (error) {
+			logger.error(`error loading guild preference: ${error}`);
+		}
 	},
 };
 

@@ -7,7 +7,7 @@ import { logger } from "../logger";
 function changeActivity(client: Client) {
 	const rand = Math.floor(Math.random() * activity.length);
 	client.user?.setPresence({
-		activities: [{ name: `${activity[rand].desc}`, type: activity[rand].type as any }],
+		activities: [{ name: `/help | ${activity[rand].desc}`, type: activity[rand].type as any }],
 	});
 }
 

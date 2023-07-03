@@ -106,10 +106,12 @@ export const embedTafsir = async (surah: number, ayat: number, title: boolean = 
 
 	let start = 0,
 		end = 2048; // Cut it to 2048
-	for (let i = 0; i < dataTafsir.length / 2048; i++) {
-		infoEmbed.push(new EmbedBuilder().setDescription(dataTafsir.slice(start, end)));
+	const loop = Math.ceil(dataTafsir.length / 2048);
+	for (let i = 0; i < loop; i++) {
+		let toAdd = new EmbedBuilder().setDescription(dataTafsir.slice(start, end));
 		start += 2048;
 		end += 2048;
+		infoEmbed.push(toAdd);
 	}
 
 	return infoEmbed;

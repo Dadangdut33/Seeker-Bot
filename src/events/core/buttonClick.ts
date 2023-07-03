@@ -7,7 +7,7 @@ import { logger } from "../../logger";
 const event: IBotEvent = {
 	name: "interactionCreate",
 	loadMsg: `👀 Module: 📨 ${__filename} loaded`,
-	execute: (interaction: Interaction) => {
+	execute: async (interaction: Interaction) => {
 		if (!interaction.isButton()) return;
 
 		let command = interaction.client.buttonCommands.get(interaction.customId.split("-")[0]); // real id is the first part of the custom id
@@ -34,9 +34,10 @@ const event: IBotEvent = {
 		}
 
 		try {
-			command.execute(interaction, interaction.customId.split("-")[1]);
+			logger.info(`executing button command ${interaction.customId}`);
+			await command.execute(interaction, interaction.customId.split("-")[1]);
 		} catch (error) {
-			logger.error(error);
+			logger.error(`error executing button command ${interaction.customId}: ${error}`);
 		}
 	},
 };

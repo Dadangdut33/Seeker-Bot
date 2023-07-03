@@ -56,9 +56,9 @@ const event: IBotEvent = {
 		}
 
 		try {
-			command.execute(message, args);
+			await command.execute(message, args);
 		} catch (error) {
-			logger.error(error);
+			logger.error(`error executing command ${command.name}: ${error}`);
 		}
 	},
 };
