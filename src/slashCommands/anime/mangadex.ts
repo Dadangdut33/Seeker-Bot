@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { btnPrompter, convertToEpoch, embedInteractionWithBtnPaginator } from "../../utils";
+import { btnPrompter, convertToEpoch, interactionBtnPaginator } from "../../utils";
 import { logger } from "../../logger";
 import { Manga, login, resolveArray } from "mangadex-full-api";
 
@@ -139,7 +139,7 @@ const slashCommands: ISlashCommand = {
 				}
 
 				// send the embed in paginator
-				embedInteractionWithBtnPaginator(interaction, embedChapterLists, 10);
+				interactionBtnPaginator(interaction, embedChapterLists, 10);
 			} else if (command === "read-chapter") {
 				const chapter = interaction.options.getInteger("chapter", true);
 				const englishOnly = interaction.options.getBoolean("english-only", false) ?? true;
@@ -206,7 +206,7 @@ const slashCommands: ISlashCommand = {
 					}
 
 					// send the embed in paginator
-					embedInteractionWithBtnPaginator(interaction, embedChaptersReader, 25); // 25 minutes timeout
+					interactionBtnPaginator(interaction, embedChaptersReader, 25); // 25 minutes timeout
 				} else {
 					// raw
 					let embed = new EmbedBuilder()

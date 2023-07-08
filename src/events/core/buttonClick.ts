@@ -34,7 +34,6 @@ const event: IBotEvent = {
 		}
 
 		try {
-			logger.info(`executing button command ${interaction.customId}`);
 			await command.execute(interaction, interaction.customId.split("-")[1]);
 		} catch (error) {
 			logger.error(`error executing button command ${interaction.customId}: ${error}`);

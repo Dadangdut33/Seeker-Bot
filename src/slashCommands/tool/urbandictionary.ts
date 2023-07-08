@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { ISlashCommand } from "../../types";
-import { embedInteractionWithBtnPaginator, toTitleCase } from "../../utils";
+import { interactionBtnPaginator, toTitleCase } from "../../utils";
 import { logger } from "../../logger";
 import axios from "axios";
 
@@ -42,7 +42,7 @@ const slashCommands: ISlashCommand = {
 					.setTitle(title);
 			});
 
-			embedInteractionWithBtnPaginator(interaction, display, 2);
+			interactionBtnPaginator(interaction, display, 2);
 		} catch (error) {
 			logger.error(`${error}`);
 			return interaction.editReply(`Error! Please try again later.\n\`\`\`${error}\`\`\``);

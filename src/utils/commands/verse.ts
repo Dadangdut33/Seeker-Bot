@@ -83,7 +83,7 @@ export const embedTafsir = async (surah: number, ayat: number, title: boolean = 
 	const infoEmbed = [
 			new EmbedBuilder()
 				.setTitle(`Tafsir Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke ${ayat}`)
-				.setDescription(data.deskripsi)
+				.setDescription(htmlToText(data.deskripsi))
 				.setFields([
 					{
 						name: "Surah nomor",
@@ -105,12 +105,13 @@ export const embedTafsir = async (surah: number, ayat: number, title: boolean = 
 		dataTafsir = data.tafsir[ayat - 1].teks;
 
 	let start = 0,
-		end = 2048; // Cut it to 2048
-	const loop = Math.ceil(dataTafsir.length / 2048);
+		limit = 1900, // limit because discord max character per send message is 6000
+		end = limit; // Cut it to the limit
+	const loop = Math.ceil(dataTafsir.length / limit);
 	for (let i = 0; i < loop; i++) {
-		let toAdd = new EmbedBuilder().setDescription(dataTafsir.slice(start, end));
-		start += 2048;
-		end += 2048;
+		let toAdd = new EmbedBuilder().setDescription(dataTafsir.slice(start, end)); // i dont care about the cut up words, spend too much trying but still not working
+		start += limit;
+		end += limit;
 		infoEmbed.push(toAdd);
 	}
 

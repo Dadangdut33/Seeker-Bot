@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from "discord.js
 import { ISlashCommand } from "../../types";
 import { embedSurah } from "../../utils/commands/verse";
 import { logger } from "../../logger";
-import { embedInteractionWithBtnPaginator } from "../../utils";
+import { interactionBtnPaginator } from "../../utils";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
@@ -35,7 +35,7 @@ const slashCommands: ISlashCommand = {
 			return row;
 		};
 
-		embedInteractionWithBtnPaginator(interaction, data, 60, { components_function: component_func }); // 60 minutes
+		interactionBtnPaginator(interaction, data, 60, { components_function: component_func }); // 60 minutes
 	},
 };
 

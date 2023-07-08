@@ -1,7 +1,7 @@
 import { logger } from "../../logger";
 import { IButtonCommand } from "../../types";
+import { interactionBtnMultiEmbedPaginator } from "../../utils/helper";
 import { embedTafsir } from "../../utils/commands/verse";
-import { embedInteractionWithBtnPaginator } from "../../utils/helper";
 
 const command: IButtonCommand = {
 	id: "tafsir",
@@ -14,10 +14,10 @@ const command: IButtonCommand = {
 
 			if (!tafsirGet) return interaction.editReply({ content: "API Failed to respond on tafsir" });
 
-			embedInteractionWithBtnPaginator(interaction as any, tafsirGet, 60);
+			interactionBtnMultiEmbedPaginator(interaction as any, tafsirGet, 3, 60);
 		} catch (error) {
 			logger.error(`${error}`);
-			interaction.editReply({ content: `Failed to execute the command. Got error: \`\`\`${error}\`\`\`` });
+			await interaction.editReply({ content: `Failed to execute the command. Got error: \`\`\`${error}\`\`\`` });
 		}
 	},
 };

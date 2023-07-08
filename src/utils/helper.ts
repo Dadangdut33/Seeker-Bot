@@ -19,6 +19,7 @@ import chalk from "chalk";
 import moment from "moment-timezone";
 import { prettyMilliseconds } from "./locallib/prettyms";
 import { consoleColorType, CONSOLE_COLORS } from "./constants";
+import { logger } from "../logger";
 
 export const logColor = (color: consoleColorType, message: any) => {
 	return chalk.hex(CONSOLE_COLORS[color])(message);
@@ -101,22 +102,28 @@ interface embedPaginator_optional {
 	btns?: ActionRowBuilder<ButtonBuilder> | null | undefined;
 	components_function?: ((index: number) => ActionRowBuilder<ButtonBuilder> | null) | null | undefined;
 }
-export const embedInteractionWithBtnPaginator = async (
+
+const calculateFooter = (index: number, cur_embed: EmbedBuilder, pageLength: number) => {
+	if (cur_embed.toJSON().footer && cur_embed.toJSON().footer?.text) {
+		// if already contains Page x/x return it
+		if (cur_embed.toJSON().footer?.text?.includes(`Page ${index + 1}/${pageLength}`)) return cur_embed.toJSON().footer?.text!;
+		else return `Page ${index + 1}/${pageLength}` + cur_embed.toJSON().footer?.text;
+	} else {
+		return `Page ${index + 1}/${pageLength}`;
+	}
+};
+
+/**
+ * Embed paginator with buttons for interaction
+ * The concept is simple, it will edit the message with new embeds and new buttons on each button click
+ * Default buttons are: Previous, Close, Next
+ */
+export const interactionBtnPaginator = async (
 	interaction: ChatInputCommandInteraction,
 	embeds: EmbedBuilder[],
 	timeout: number,
 	{ content, btns, components_function }: embedPaginator_optional = {}
 ) => {
-	// ------------------ //
-	const calculateFooter = (index: number, cur_embed: EmbedBuilder) => {
-		if (cur_embed.toJSON().footer && cur_embed.toJSON().footer?.text) {
-			// if already contains Page x/x return it
-			if (cur_embed.toJSON().footer?.text?.includes(`Page ${index + 1}/${embeds.length}`)) return cur_embed.toJSON().footer?.text!;
-			else return `Page ${index + 1}/${embeds.length}` + cur_embed.toJSON().footer?.text;
-		} else {
-			return `Page ${index + 1}/${embeds.length}`;
-		}
-	};
 	// ------------------ //
 	// Default Button
 	if (!btns)
@@ -125,39 +132,40 @@ export const embedInteractionWithBtnPaginator = async (
 			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
 			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
 		);
-	// ------------------ //
+
 	let index = 0,
 		closedManually = false;
 	const originalEmbed = embeds.map((embed) => embed), // copy it in new array
 		msg = await interaction.editReply({
 			content: content ? content : "",
-			embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+			embeds: [embeds[0].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })],
 			components: [btns],
 		}),
 		collector = msg.createMessageComponentCollector({ time: timeout * 1000 * 60 });
 
+	// ------------------ //
 	collector.on("collect", async (i) => {
 		if (i.customId === "next") {
 			index++;
 			if (index >= embeds.length) index = 0;
 			if (components_function) {
 				await i.update({
-					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })],
 					components: [btns!, components_function(index)!],
 				});
 			} else {
-				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })] });
 			}
 		} else if (i.customId === "back") {
 			index--;
 			if (index < 0) index = embeds.length - 1;
 			if (components_function) {
 				await i.update({
-					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })],
+					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })],
 					components: [btns!, components_function(index)!],
 				});
 			} else {
-				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index]) })] });
+				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })] });
 			}
 		} else if (i.customId === "stop") {
 			await i.update({ embeds: [embeds[index]], components: [] });
@@ -166,13 +174,133 @@ export const embedInteractionWithBtnPaginator = async (
 		}
 	});
 
+	// ------------------ //
 	collector.on("end", async () => {
+		// check footer if there exist a footer
 		const footerEnd =
 			originalEmbed[index].toJSON().footer && originalEmbed[index].toJSON().footer?.text
 				? originalEmbed[index].toJSON().footer?.text + ` | ${closedManually ? "Page switcher closed" : "Page switcher closed due to timeout"}`
 				: `${closedManually ? "Page switcher closed" : "Page switcher closed due to timeout"}`;
 
-		await msg.edit({ embeds: [embeds[index].setFooter({ text: footerEnd })], components: [] });
+		if (interaction.ephemeral) await interaction.deleteReply(); // delete the original reply if it's ephemeral
+		else await msg.edit({ embeds: [embeds[index].setFooter({ text: footerEnd })], components: [] });
+	});
+};
+
+/**
+ * Embed paginator with buttons for interaction but with multiple embeds per page
+ */
+export const interactionBtnMultiEmbedPaginator = async (
+	interaction: ChatInputCommandInteraction,
+	embeds: EmbedBuilder[],
+	embed_per_page: number,
+	timeout: number,
+	{ content, btns, components_function }: embedPaginator_optional = {}
+) => {
+	// ------------------ //
+	// Default Button
+	if (!btns)
+		btns = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder().setCustomId("back").setLabel("Previous").setStyle(ButtonStyle.Secondary),
+			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
+			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
+		);
+
+	let index = 0,
+		closedManually = false,
+		slice_start = index * embed_per_page,
+		slice_end = index * embed_per_page + embed_per_page;
+
+	const limitPageMove = Math.ceil(embeds.length / embed_per_page),
+		originalEmbed = embeds.map((embed) => embed), // copy it in new array
+		msg = await interaction.editReply({
+			content: content ? content : "",
+			embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+				// only change the footer of the last embed
+				const len = embeds.slice(slice_start, slice_end).length;
+				if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+				else return embed;
+			}),
+			components: [btns],
+		}),
+		collector = msg.createMessageComponentCollector({ time: timeout * 1000 * 60 });
+
+	// ------------------ //
+	collector.on("collect", async (i) => {
+		if (i.customId === "next") {
+			index++;
+			if (index >= limitPageMove) index = 0;
+			slice_start = index * embed_per_page;
+			slice_end = index * embed_per_page + embed_per_page;
+			if (components_function) {
+				await i.update({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+						else return embed;
+					}),
+					components: [btns!, components_function(index)!],
+				});
+			} else {
+				await i.update({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+						else return embed;
+					}),
+				});
+			}
+		} else if (i.customId === "back") {
+			index--;
+			if (index < 0) index = limitPageMove - 1;
+			slice_start = index * embed_per_page;
+			slice_end = index * embed_per_page + embed_per_page;
+			if (components_function) {
+				await i.update({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+						else return embed;
+					}),
+					components: [btns!, components_function(index)!],
+				});
+			} else {
+				await i.update({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+						else return embed;
+					}),
+				});
+			}
+		} else if (i.customId === "stop") {
+			await i.update({ components: [] });
+
+			closedManually = true;
+			collector.stop();
+		}
+	});
+
+	// ------------------ //
+	collector.on("end", async () => {
+		try {
+			const footerEnd = closedManually
+				? `Page ${index + 1}/${limitPageMove} | Page switcher closed`
+				: `Page ${index + 1}/${limitPageMove} | Page switcher closed due to timeout`;
+
+			if (interaction.ephemeral) await interaction.deleteReply(); // delete the original reply if it's ephemeral
+			else
+				await msg.edit({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: footerEnd });
+						else return embed;
+					}),
+					components: [],
+				}); // edit the original reply if it's not ephemeral
+		} catch (error) {
+			logger.error(`${error}`);
+		}
 	});
 };
 
