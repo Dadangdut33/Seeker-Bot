@@ -164,7 +164,7 @@ const slashCommands: ISlashCommand = {
 		const command = interaction.options.getSubcommand();
 
 		if (command === "surah") {
-			const surah = interaction.options.getInteger("surah", true);
+			const surah = interaction.options.getInteger("ke", true);
 			const startAyat = interaction.options.getInteger("start-ayat", false);
 			const endAyat = interaction.options.getInteger("end-ayat", false);
 

@@ -147,18 +147,30 @@ export const embedSurah = async (surah: number, start?: number | null, end?: num
 			]),
 	];
 
+	/*
+	 * Slice the ayat data while also checking if the start and end is valid
+	 */
 	if (start && end) {
-		// slice data by start and end
-		if (end > data.jumlahAyat) end = data.jumlahAyat; // check end
+		if (end > data.jumlahAyat) end = data.jumlahAyat;
+		if (start > end) {
+			// start > end, swap the value
+			let temp = start;
+			start = end;
+			end = temp;
+		}
+
 		ayatData = data.ayat.slice(start - 1, end);
 		embedLists[0].setTitle(`Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke ${start} sampai ${end}`);
 	} else if (start && !end) {
-		// slice the start to the end of the data
+		if (start > data.jumlahAyat) start = data.jumlahAyat;
+		if (start < 1) start = 1;
+
 		ayatData = data.ayat.slice(start - 1, data.ayat.length);
 		embedLists[0].setTitle(`Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke ${start} sampai ${data.jumlahAyat}`);
 	} else if (!start && end) {
-		// slice the start to the end of the data
-		if (end > data.jumlahAyat) end = data.jumlahAyat; // check end
+		if (end > data.jumlahAyat) end = data.jumlahAyat;
+		if (end < 1) end = 1;
+
 		ayatData = data.ayat.slice(0, end);
 		embedLists[0].setTitle(`Q.S ${data.namaLatin} (${data.nama}) - ${data.arti} ayat ke 1 sampai ${end}`);
 	}
@@ -171,7 +183,7 @@ export const embedSurah = async (surah: number, start?: number | null, end?: num
 			toPush.push(
 				new EmbedBuilder()
 					.setAuthor({ name: `Q.S ${data.namaLatin} (${data.nama}) - ${data.arti}` })
-					.setTitle(`Ayat ke-${data.ayat[index].nomorAyat}`)
+					.setTitle(`Ayat ke-${val.nomorAyat}`)
 					.setDescription(val.teksArab.slice(i * 2048, (i + 1) * 2048))
 			);
 		}
