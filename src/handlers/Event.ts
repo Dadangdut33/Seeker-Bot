@@ -1,15 +1,13 @@
 import { Client } from "discord.js";
-import { join } from "path";
-import { logColor, walkdir } from "../utils";
+import { events_dir, logColor, walkdir } from "../utils";
 import { IBotEvent } from "../types";
 import { logger } from "../logger";
 
 module.exports = (client: Client) => {
-	let eventsDir = join(__dirname, "../events"),
-		counter = 0;
+	let counter = 0;
 
 	logger.info(logColor("text", `🔥 Loading events...`));
-	walkdir(eventsDir).forEach((file) => {
+	walkdir(events_dir).forEach((file) => {
 		if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 		let event: IBotEvent = require(file).default;
 		if (event.disabled) return; // check disabled

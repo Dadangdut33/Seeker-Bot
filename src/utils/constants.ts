@@ -23,3 +23,9 @@ export const CONSOLE_COLORS = {
 };
 
 export const md_session_cache_location = path.join(__dirname, "..", "..", ".MD_cache");
+
+export const commands_dir = path.join(__dirname, "..", "commands");
+export const events_dir = path.join(__dirname, "..", "events");
+export const cmd_msg_dir = path.join(commands_dir, "message");
+export const cmd_btn_dir = path.join(commands_dir, "button");
+export const cmd_slash_dir = path.join(commands_dir, "slash");

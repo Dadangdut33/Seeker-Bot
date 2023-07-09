@@ -1,7 +1,6 @@
 import { Client, Routes, SlashCommandBuilder } from "discord.js";
 import { REST } from "@discordjs/rest";
-import { join } from "path";
-import { logColor, walkdir } from "../utils";
+import { cmd_btn_dir, cmd_msg_dir, cmd_slash_dir, logColor, walkdir } from "../utils";
 import { IButtonCommand, ICommand, ISlashCommand } from "../types";
 import { logger } from "../logger";
 
@@ -12,14 +11,11 @@ import { logger } from "../logger";
  */
 module.exports = (client: Client) => {
 	const slashCommands: SlashCommandBuilder[] = [],
-		commands: ICommand[] = [],
-		slashCommandsDir = join(__dirname, "../slashCommands"),
-		commandsDir = join(__dirname, "../commands"),
-		buttonCommandsDir = join(__dirname, "../buttonCommands");
+		commands: ICommand[] = [];
 
 	// ------------------------------ //
 	logger.info(logColor("text", `🔥 Loading commands...`));
-	walkdir(commandsDir).forEach((file) => {
+	walkdir(cmd_msg_dir).forEach((file) => {
 		try {
 			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 			let command: ICommand = require(file).default;
@@ -36,7 +32,7 @@ module.exports = (client: Client) => {
 	});
 
 	logger.info(logColor("text", `🔥 Loading slash commands...`));
-	walkdir(slashCommandsDir).forEach((file) => {
+	walkdir(cmd_slash_dir).forEach((file) => {
 		try {
 			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 			let slashCommand: ISlashCommand = require(file).default;
@@ -53,7 +49,7 @@ module.exports = (client: Client) => {
 	});
 
 	logger.info(logColor("text", `🔥 Loading button commands...`));
-	walkdir(buttonCommandsDir).forEach((file) => {
+	walkdir(cmd_btn_dir).forEach((file) => {
 		try {
 			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 			let buttonCommand: IButtonCommand = require(file).default;
