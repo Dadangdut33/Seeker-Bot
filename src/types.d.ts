@@ -72,6 +72,39 @@ export interface IAuditWatchMongo extends Document {}
 export interface IanyDB {
 	[key: string]: any;
 }
+
+// ------------------ Bot - Music ------------------
+export interface IMusicPlayer {
+	player: AudioPlayer;
+	currentId: string;
+	currentTitle: string;
+	currentUrl: string;
+	query: string;
+	seekTime: number;
+	loop: boolean;
+	auto: boolean;
+	volume: number;
+	/** Bot leave timeout, will reset everytime new song is added by play command */
+	timeOutIdle: NodeJS.Timeout;
+	/** Store related video that has been played this session. Will reset everytime bot stop playing music */
+	relatedIdTakenThisSession: string[];
+}
+
+export interface IMusicQueue {
+	id: string;
+	type: "live" | "video";
+	title: string;
+	link: string;
+	query: string;
+}
+
+export interface IMusicSession {
+	gid: string;
+	vc_id: string;
+	tc_id: string;
+	queue: IMusicQueue[];
+}
+
 // ------------------ Events ------------------
 // Quran.com API
 export interface IQuranComTranslation {
@@ -217,5 +250,6 @@ declare module "discord.js" {
 		buttonCommands: Collection<string, IButtonCommand>;
 		cooldowns: Collection<string, number>;
 		guildPreferences: Collection<string, IGuild>;
+		musicPlayers: Collection<string, IMusicPlayer>;
 	}
 }

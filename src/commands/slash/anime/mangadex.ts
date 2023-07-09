@@ -22,12 +22,7 @@ const slashCommands: ISlashCommand = {
 				.addStringOption((option) => option.setName("query").setDescription("Manga title").setRequired(true))
 				.addIntegerOption((option) => option.setName("chapter").setDescription("Chapter number").setRequired(true).setMinValue(0))
 				.addBooleanOption((option) =>
-					option
-						.setName("english-only")
-						.setDescription(
-							"English result only? (Default true). Set it to false if you want to input the chapter number that you get from list-chapter when you search with english-only also set to false"
-						)
-						.setRequired(false)
+					option.setName("english-only").setDescription("English result only? (Default true). Set to false if inputing chapter using list-chapter.").setRequired(false)
 				)
 				.addBooleanOption((option) =>
 					option.setName("raw").setDescription("Send the results as plain image instead of as embed reader (Default false)").setRequired(false)
@@ -36,6 +31,10 @@ const slashCommands: ISlashCommand = {
 
 	execute: async (interaction) => {
 		try {
+			const whitelist = ["640790707082231834", "651015913080094721", "791234592811122729"];
+			// limit to only my personal server
+			if (!whitelist.includes(interaction.guildId!)) return interaction.reply({ content: "This command is not available in this server", ephemeral: true });
+
 			const command = interaction.options.getSubcommand();
 			const query = interaction.options.getString("query", true);
 

@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
-import { ICommand, ISlashCommand, IGuild, IButtonCommand } from "./types";
+import { ICommand, ISlashCommand, IGuild, IButtonCommand, IMusicPlayer } from "./types";
 import { config } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
@@ -34,6 +34,7 @@ if (!process.env.SAUCENAO_API_KEY) logger.warn("WARNING!!! SauceNao API key is n
 	client.buttonCommands = new Collection<string, IButtonCommand>();
 	client.guildPreferences = new Collection<string, IGuild>();
 	client.cooldowns = new Collection<string, number>();
+	client.musicPlayers = new Collection<string, IMusicPlayer>();
 
 	// Load client handlers
 	const handlersDir = join(__dirname, "./handlers");
