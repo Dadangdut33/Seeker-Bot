@@ -128,9 +128,11 @@ export const interactionBtnPaginator = async (
 	// Default Button
 	if (!btns)
 		btns = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder().setCustomId("first").setLabel("⏮️").setStyle(ButtonStyle.Primary),
 			new ButtonBuilder().setCustomId("back").setLabel("Previous").setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
-			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
+			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary),
+			new ButtonBuilder().setCustomId("last").setLabel("⏭️").setStyle(ButtonStyle.Primary)
 		);
 
 	let index = 0,
@@ -145,32 +147,44 @@ export const interactionBtnPaginator = async (
 
 	// ------------------ //
 	collector.on("collect", async (i) => {
-		if (i.customId === "next") {
-			index++;
-			if (index >= embeds.length) index = 0;
+		switch (i.customId) {
+			case "first":
+				index = 0;
+			// ------------------ //
+			case "next":
+				index++;
+				if (index >= embeds.length) index = 0;
+				break;
+			// ------------------ //
+			case "back":
+				index--;
+				if (index < 0) index = embeds.length - 1;
+				break;
+			case "last":
+				index = embeds.length - 1;
+				break;
+			// ------------------ //
+			case "stop":
+				await i.update({ components: [] });
+
+				closedManually = true;
+				collector.stop();
+				break;
+		}
+
+		if (!closedManually) {
 			if (components_function) {
+				let temp = components_function(index),
+					components = [btns!];
+				if (temp) components.push(temp);
+
 				await i.update({
 					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })],
-					components: [btns!, components_function(index)!],
+					components: components,
 				});
 			} else {
 				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })] });
 			}
-		} else if (i.customId === "back") {
-			index--;
-			if (index < 0) index = embeds.length - 1;
-			if (components_function) {
-				await i.update({
-					embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })],
-					components: [btns!, components_function(index)!],
-				});
-			} else {
-				await i.update({ embeds: [embeds[index].setFooter({ text: calculateFooter(index, originalEmbed[index], embeds.length) })] });
-			}
-		} else if (i.customId === "stop") {
-			await i.update({ embeds: [embeds[index]], components: [] });
-			closedManually = true;
-			collector.stop();
 		}
 	});
 
@@ -201,9 +215,11 @@ export const interactionBtnMultiEmbedPaginator = async (
 	// Default Button
 	if (!btns)
 		btns = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder().setCustomId("first").setLabel("⏮️").setStyle(ButtonStyle.Primary),
 			new ButtonBuilder().setCustomId("back").setLabel("Previous").setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder().setCustomId("stop").setLabel("Close").setStyle(ButtonStyle.Danger),
-			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary)
+			new ButtonBuilder().setCustomId("next").setLabel("Next").setStyle(ButtonStyle.Secondary),
+			new ButtonBuilder().setCustomId("last").setLabel("⏭️").setStyle(ButtonStyle.Primary)
 		);
 
 	let index = 0,
@@ -227,57 +243,56 @@ export const interactionBtnMultiEmbedPaginator = async (
 
 	// ------------------ //
 	collector.on("collect", async (i) => {
-		if (i.customId === "next") {
-			index++;
-			if (index >= limitPageMove) index = 0;
-			slice_start = index * embed_per_page;
-			slice_end = index * embed_per_page + embed_per_page;
-			if (components_function) {
-				await i.update({
-					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
-						const len = embeds.slice(slice_start, slice_end).length;
-						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
-						else return embed;
-					}),
-					components: [btns!, components_function(index)!],
-				});
-			} else {
-				await i.update({
-					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
-						const len = embeds.slice(slice_start, slice_end).length;
-						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
-						else return embed;
-					}),
-				});
-			}
-		} else if (i.customId === "back") {
-			index--;
-			if (index < 0) index = limitPageMove - 1;
-			slice_start = index * embed_per_page;
-			slice_end = index * embed_per_page + embed_per_page;
-			if (components_function) {
-				await i.update({
-					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
-						const len = embeds.slice(slice_start, slice_end).length;
-						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
-						else return embed;
-					}),
-					components: [btns!, components_function(index)!],
-				});
-			} else {
-				await i.update({
-					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
-						const len = embeds.slice(slice_start, slice_end).length;
-						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
-						else return embed;
-					}),
-				});
-			}
-		} else if (i.customId === "stop") {
-			await i.update({ components: [] });
+		switch (i.customId) {
+			case "first":
+				index = 0;
+			// ------------------ //
+			case "next":
+				index++;
+				if (index >= limitPageMove) index = 0;
+				break;
+			// ------------------ //
+			case "back":
+				index--;
+				if (index < 0) index = limitPageMove - 1;
+				break;
+			case "last":
+				index = limitPageMove - 1;
+				break;
+			// ------------------ //
+			case "stop":
+				await i.update({ components: [] });
 
-			closedManually = true;
-			collector.stop();
+				closedManually = true;
+				collector.stop();
+				break;
+		}
+
+		if (!closedManually) {
+			slice_start = index * embed_per_page;
+			slice_end = index * embed_per_page + embed_per_page;
+			if (components_function) {
+				let temp = components_function(index),
+					components = [btns!];
+				if (temp) components.push(temp);
+
+				await i.update({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+						else return embed;
+					}),
+					components: components,
+				});
+			} else {
+				await i.update({
+					embeds: embeds.slice(slice_start, slice_end).map((embed, i) => {
+						const len = embeds.slice(slice_start, slice_end).length;
+						if (i === len - 1) return embed.setFooter({ text: calculateFooter(index, originalEmbed[index * embed_per_page], limitPageMove) });
+						else return embed;
+					}),
+				});
+			}
 		}
 	});
 

@@ -33,6 +33,8 @@ export interface ISlashCommand {
 export interface IButtonCommand {
 	id: string; // name is the id
 	execute: (interaction: ButtonInteraction, args: any) => promise<void>;
+	deferEarly?: boolean;
+	ephemealDefer?: boolean; // only for deferEarly
 	guildOnly?: boolean;
 	cooldown?: number;
 	disabled?: boolean;

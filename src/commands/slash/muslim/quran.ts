@@ -176,7 +176,7 @@ const slashCommands: ISlashCommand = {
 			}
 
 			const component_func = (index: number) => {
-				if (!data[index].toJSON().title) return null;
+				if (!data[index].toJSON().author) return null;
 
 				// ayat is located in the title of the embed with format like this Ayat ke-xxx
 				const ayat = data[index].toJSON().title?.split("-")[1];

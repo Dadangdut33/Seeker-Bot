@@ -73,6 +73,7 @@ module.exports = (client: Client) => {
 		.then((data: any) => {
 			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
 			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
+			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", client.buttonCommands.size)} button command(s)`));
 		})
 		.catch((e) => {
 			logger.error(`${e}`);
