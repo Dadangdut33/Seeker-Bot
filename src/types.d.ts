@@ -10,6 +10,7 @@ import {
 	ChatInputCommandInteraction,
 } from "discord.js";
 import { Document } from "mongoose";
+import { AudioPlayer } from "@discordjs/voice";
 
 // ------------------ Bot - DB ------------------
 export interface ICommand {

@@ -76,7 +76,7 @@ const slashCommands: ISlashCommand = {
 					.setDescription(options.join("\n"));
 
 				const msg = await interaction.editReply({ content: "", embeds: [embedOption], components: [btnsRow] });
-				const promptResult = await btnPrompter(msg, interaction, 120);
+				const promptResult = await btnPrompter(msg, interaction, 2);
 
 				if (!promptResult) return interaction.editReply({ content: `**Manga search cancelled** user did not choose any manga listed`, embeds: [], components: [] });
 

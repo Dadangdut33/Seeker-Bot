@@ -101,6 +101,40 @@ export const convertToEpoch = (date: Date) => {
 	return Math.floor(date.getTime() / 1000);
 };
 
+export const fancyTimeFormat = (duration: number) => {
+	// Hours, minutes and seconds
+	let hrs = ~~(duration / 3600);
+	let mins = ~~((duration % 3600) / 60);
+	let secs = ~~duration % 60;
+
+	let ret = "";
+
+	if (hrs > 0) {
+		ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+	}
+
+	ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+	ret += "" + secs;
+	return ret;
+};
+
+export const fancyTimeFormatMs = (duration: number) => {
+	// Hours, minutes and seconds
+	let hrs = ~~(duration / 3600000);
+	let mins = ~~((duration % 3600000) / 60000);
+	let secs = ~~((duration % 60000) / 1000);
+
+	let ret = "";
+
+	if (hrs > 0) {
+		ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+	}
+
+	ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+	ret += "" + secs;
+	return ret;
+};
+
 interface embedPaginator_optional {
 	content?: string | null | undefined;
 	btns?: ActionRowBuilder<ButtonBuilder> | null | undefined;
@@ -325,7 +359,7 @@ export const btnPrompter = async (msg: Message<boolean>, interaction: ChatInputC
 	return msg
 		.awaitMessageComponent({
 			filter: senderOnly ? (args) => args.user.id == interaction.user.id : undefined,
-			time: timeout * 1000,
+			time: timeout * 1000 * 60, // per minute
 			componentType: ComponentType.Button,
 			dispose: true,
 		})
