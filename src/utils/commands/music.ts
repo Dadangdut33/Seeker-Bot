@@ -27,6 +27,9 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 		// verify if idle or stopped
 		if (mp.player.state.status !== "idle") return;
 
+		// check bot still in vc or not
+		if (!getVoiceConnection(guild.id)) return;
+
 		// get queue data & verify if guild is registered or not
 		let queueData = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
 		if (!queueData || queueData.length === 0) {
@@ -113,7 +116,7 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 							],
 							color: 0x00ff00,
 							thumbnail: {
-								url: `https://img.youtube.com/vi/${nextVideo.id}/hqdefault.jpg`,
+								url: `https://img.youtube.com/vi/${nextVideo.id}/maxresdefault.jpg`,
 							},
 						},
 					],
@@ -237,7 +240,7 @@ export const sendVideoInfo = async (interaction: ChatInputCommandInteraction<Cac
 				],
 				color: 0x00ff00,
 				thumbnail: {
-					url: `https://img.youtube.com/vi/${videoInfo.videoDetails.videoId}/hqdefault.jpg`,
+					url: `https://img.youtube.com/vi/${videoInfo.videoDetails.videoId}/maxresdefault.jpg`,
 				},
 			},
 		],
@@ -252,7 +255,7 @@ export const sendVideoInfo = async (interaction: ChatInputCommandInteraction<Cac
 						.setStyle(ButtonStyle.Link)
 						.setEmoji("🔗"),
 					new ButtonBuilder()
-						.setURL(`https://img.youtube.com/vi/${videoInfo.videoDetails.videoId}/hqdefault.jpg`)
+						.setURL(`https://img.youtube.com/vi/${videoInfo.videoDetails.videoId}/maxresdefault.jpg`)
 						.setLabel("Open Thumbnail Image")
 						.setStyle(ButtonStyle.Link)
 						.setEmoji("📷"),
@@ -544,7 +547,7 @@ export const nowPlaying = async (interaction: ChatInputCommandInteraction<CacheT
 
 	let loadBar: string[] = [];
 	if (!videoInfo.videoDetails.isLiveContent) {
-		loadBar = splitBar(total, current, 15);
+		loadBar = splitBar(total, current, 18);
 		loadBar.pop(); // remove last array element (its a number thingy)
 	}
 

@@ -43,6 +43,7 @@ const event: IBotEvent = {
 
 				// if reactions >= 3, send it to the highlightChannel
 				if (count >= 3) {
+					logger.debug("dasdasd asd asda");
 					let data = {
 							guildID: guildID,
 							channelID: reaction.message.channel.id,
@@ -54,11 +55,11 @@ const event: IBotEvent = {
 					if (db_Data.length > 0) return;
 
 					// insert to db
-					insert_colname("spotlighted_message", data);
+					await insert_colname("spotlighted_message", data);
 
 					// verify attachment
 					let attachment = msg.attachments.size > 0 ? msg.attachments.first()!.url : ""; // if an attachment (ANY)
-					if (attachment === "" && msg.embeds.length > 0 && msg.embeds[0].image) attachment = msg.embeds[0].url!; // if embedded link (IMAGE)
+					if (attachment === "" && msg.embeds.length > 0 && (msg.embeds[0].image || msg.embeds[0].video)) attachment = msg.embeds[0].data.url!; // if embedded link (IMAGE)
 
 					const embed = new EmbedBuilder()
 						.setColor("Yellow")
@@ -67,17 +68,16 @@ const event: IBotEvent = {
 							iconURL: msg.author.displayAvatarURL({ extension: "png", size: 2048 }),
 							url: `https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id}`,
 						})
-						.setDescription(msg ? msg.toString() : "-")
 						.setImage(attachment)
 						.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
 						.setFooter({ text: `✨ Starred` })
 						.setTimestamp();
 
-					// add attachment link if exist
+					if (msg.toString().length > 0) embed.setDescription(msg.toString());
 					if (attachment !== "") embed.addFields([{ name: `Attachment`, value: `[Link](${attachment})`, inline: true }]);
 
 					// send the message 🚀
-					channel.send({ content: `<#${reaction.message.channel.id}>`, embeds: [embed] });
+					channel.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
 
 					// -------------------------------------
 					// check if attachment is a video

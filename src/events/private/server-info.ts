@@ -1,8 +1,7 @@
 import { Client, Guild, EmbedBuilder, TextChannel, GuildEmoji } from "discord.js";
-import moment from "moment-timezone";
 import { IBotEvent } from "../../types";
 import { logger } from "../../logger";
-import { OnlineUsers as onlineUsers, getEmoji, getMemberNewest, getMemberOldest, totalBots } from "../../utils/helper";
+import { OnlineUsers as onlineUsers, getEmoji, getMemberNewest, getMemberOldest, totalBots, convertToEpoch } from "../../utils/helper";
 import { prettyMilliseconds } from "../../utils/locallib/prettyms";
 
 const embedStats = (
@@ -36,8 +35,8 @@ const embedStats = (
 					{ name: "Server Age", value: `${prettyMilliseconds(age)}`, inline: true },
 					{ name: "Server Permanent Link", value: `${process.env.Server_invite}`, inline: false },
 					{
-						name: "Server Created At / Age",
-						value: `${moment(guild.createdAt).tz("Asia/Jakarta").format("dddd DD MMMM YYYY HH:mm:ss")} GMT+0700 / ${prettyMilliseconds(age)}`,
+						name: "Server Created At",
+						value: `<t:${convertToEpoch(guild.createdAt)}:F>`,
 						inline: false,
 					},
 					{ name: `Rules & Guides Channel`, value: `<#${rulesChannelID}>`, inline: true },
@@ -73,7 +72,7 @@ const embedMember = (client: Client, channelID: string, memberInfoID: string, ol
 };
 
 const embedNonAnimatedEmojis = (client: Client, channelID: string, id_embed: string, emojis: GuildEmoji[]) => {
-	const animatedOnly = emojis.filter((emoji) => emoji.animated);
+	const nonAnimatedOnly = emojis.filter((emoji) => !emoji.animated);
 
 	client.channels.fetch(channelID).then((channel) => {
 		// First fetch channel from client
@@ -82,8 +81,8 @@ const embedNonAnimatedEmojis = (client: Client, channelID: string, id_embed: str
 				embedLists: EmbedBuilder[] = [],
 				counter = 1;
 
-			animatedOnly.forEach((emoji) => {
-				store.push(`<a:${emoji.name}:${emoji.id}>`);
+			nonAnimatedOnly.forEach((emoji) => {
+				store.push(`<:${emoji.name}:${emoji.id}>`);
 
 				if (store.length >= 50) {
 					let embed = new EmbedBuilder() //
@@ -100,12 +99,12 @@ const embedNonAnimatedEmojis = (client: Client, channelID: string, id_embed: str
 
 			if (store.length > 0) {
 				let embed = new EmbedBuilder() //
-					.setDescription(`**[${counter}]**\n${store.join(" ")}`)
+					.setDescription(`Non Animated **[${counter}]**\n${store.join(" ")}`)
 					.setColor("Random");
 				embedLists.push(embed);
 			}
 
-			msg.edit({ embeds: embedLists });
+			msg.edit({ content: `# __**Server Emojis**__`, embeds: embedLists });
 		});
 	});
 };
@@ -136,7 +135,7 @@ const embedAnimatedEmojis = (client: Client, channelID: string, id_embed: string
 
 			if (store.length > 0) {
 				let embed = new EmbedBuilder() //
-					.setDescription(`**[${counter}]**\n${store.join(" ")}`)
+					.setDescription(`Animated **[${counter}]**\n${store.join(" ")}`)
 					.setColor("Random");
 				embedLists.push(embed);
 			}

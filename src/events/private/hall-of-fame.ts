@@ -87,7 +87,7 @@ const event: IBotEvent = {
 
 				// verify attachment
 				let attachment = msg.attachments.size > 0 ? msg.attachments.first()!.url : ""; // if an attachment (ANY)
-				if (attachment === "" && msg.embeds.length > 0 && msg.embeds[0].image) attachment = msg.embeds[0].url!; // if embedded link (IMAGE)
+				if (attachment === "" && msg.embeds.length > 0 && (msg.embeds[0].image || msg.embeds[0].video)) attachment = msg.embeds[0].data.url!; // if embedded link (IMAGE)
 
 				const embed = new EmbedBuilder()
 					.setColor("Aqua")
@@ -102,11 +102,11 @@ const event: IBotEvent = {
 					.setFooter({ text: footerChoice[Math.floor(Math.random() * footerChoice.length)] })
 					.setTimestamp();
 
-				// add attachment link if exist
+				if (msg.toString().length > 0) embed.setDescription(msg.toString());
 				if (attachment !== "") embed.addFields([{ name: `Attachment`, value: `[Link](${attachment})`, inline: true }]);
 
 				// send the message 🚀
-				channel.send({ content: `<#${reaction.message.channel.id}>`, embeds: [embed] });
+				channel.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
 
 				// -------------------------------------
 				// check if attachment is a video

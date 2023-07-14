@@ -8,11 +8,11 @@ const event: IBotEvent = {
 	name: "ready",
 	once: true,
 	loadMsg: `👀 Module: ${__filename} loaded`,
-	disabled: true,
+	disabled: false,
 	execute: (client: Client) => {
 		{
 			const guildID = process.env.PERSONAL_SERVER_ID!,
-				channelID = "1119688966694781009";
+				channelID = "1129466491960574063";
 
 			const guild = client.guilds.cache.get(guildID);
 			if (!guild) return logger.warn("Invalid guild for daily surah");

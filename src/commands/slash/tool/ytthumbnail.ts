@@ -26,10 +26,10 @@ const slashCommands: ISlashCommand = {
 			.addFields([
 				{
 					name: `Link to The Thumbnail`,
-					value: `[Default Quality](${defaultImg}) | [HQ](${hqDefault}) | [MQ](${mqDefault}) | [SD](${sdDefault}) | [Maxres](${maxDefault})\n\n:arrow_down: **Preview of SD Quality**`,
+					value: `[Default Quality](${defaultImg}) | [HQ](${hqDefault}) | [MQ](${mqDefault}) | [SD](${sdDefault}) | [Maxres](${maxDefault})\n\n:arrow_down: **Preview of Max Quality**`,
 				},
 			])
-			.setImage(sdDefault)
+			.setImage(maxDefault)
 			.setColor("#FF0000")
 			.setTimestamp();
 
