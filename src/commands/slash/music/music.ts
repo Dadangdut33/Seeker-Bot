@@ -25,6 +25,7 @@ const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
 		.setName("music")
 		.setDescription("Music commands through youtube video or live stream")
+		.setDMPermission(false)
 		.addSubcommand((subcommand) => subcommand.setName("pause").setDescription("Pause the current playing audio"))
 		.addSubcommand((subcommand) => subcommand.setName("unpause").setDescription("Resume the current paused audio"))
 		.addSubcommand((subcommand) => subcommand.setName("stop").setDescription("Stop the current playing audio"))
