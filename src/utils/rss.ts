@@ -43,7 +43,7 @@ export const run_rss = async (gid: string, type: string, feedurl: string, nyaa =
 		}
 
 		// update db
-		await updateOne_colname("rssfeeds", { gid }, { $set: { last_feed: feed.items[0].guid } });
+		await updateOne_colname("rssfeeds", { gid: gid, type: type }, { $set: { last_feed: feed.items[0].guid } });
 
 		// if index is -1, then last found is not found in feed which means no cut
 		// slice feed from 0 to last found
