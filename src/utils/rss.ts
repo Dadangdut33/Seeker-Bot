@@ -149,7 +149,7 @@ export const send_crunchyroll = async (gid: string, type: string, feedurl: strin
 };
 
 export const send_nyaa = async (gid: string, type: string, feedurl: string, channel: TextChannel) => {
-	const feed = await run_rss(gid, type, feedurl);
+	const feed = await run_rss(gid, type, feedurl, true);
 	if (!feed) return; // if feed is empty, then no new item and no need to send message
 
 	let embedList = [];
