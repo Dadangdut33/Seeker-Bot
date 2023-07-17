@@ -3,7 +3,7 @@ import Parser from "rss-parser";
 import { find_colname, insert_colname, updateOne_colname } from "./db";
 const parser = new Parser();
 
-export const run_rss = async (gid: string, type: string, feedurl: string) => {
+export const run_rss = async (gid: string, type: string, feedurl: string, nyaa = false) => {
 	const feed = await parser.parseURL(feedurl);
 
 	// check if guild is registered in db
@@ -17,17 +17,29 @@ export const run_rss = async (gid: string, type: string, feedurl: string) => {
 		let limit = 15,
 			index = -1,
 			counter = 0;
-		const last_feed = check[0].last_feed,
-			splitted = last_feed.split("/"),
-			baseLink = splitted.slice(0, splitted.length - 1).join("/");
 
-		// get index of last found
-		// in a while loop because item can sometimes already removed from feed
-		while (index === -1) {
-			index = feed.items.findIndex((item) => item.guid === baseLink + "/" + `${parseInt(splitted[splitted.length - 1]) - counter}`);
+		if (nyaa) {
+			const last_feed = check[0].last_feed,
+				splitted = last_feed.split("/"),
+				baseLink = splitted.slice(0, splitted.length - 1).join("/");
 
-			counter++;
-			if (counter === limit) break;
+			// get index of last found
+			// in a while loop because item can sometimes already removed from feed
+			while (index === -1) {
+				index = feed.items.findIndex((item) => item.guid === baseLink + "/" + `${parseInt(splitted[splitted.length - 1]) - counter}`);
+
+				counter++;
+				if (counter === limit) break;
+			}
+		} else {
+			// get index of last found
+			// in a while loop because item can sometimes already removed from feed
+			while (index === -1) {
+				index = feed.items.findIndex((item) => item.guid === check[0].last_feed);
+
+				counter++;
+				if (counter === limit) break;
+			}
 		}
 
 		// update db
