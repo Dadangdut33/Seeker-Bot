@@ -1,8 +1,8 @@
 import { Client, Routes, SlashCommandBuilder } from "discord.js";
-import { REST } from "@discordjs/rest";
 import { cmd_btn_dir, cmd_msg_dir, cmd_slash_dir, logColor, walkdir } from "../utils";
 import { IButtonCommand, ICommand, ISlashCommand } from "../types";
 import { logger } from "../logger";
+import express, { Request, Response } from "express";
 
 /**
  * @description
@@ -64,18 +64,12 @@ module.exports = (client: Client) => {
 		}
 	});
 
-	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+	const app = express();
+	const port = process.env.PORT || 10032;
 
-	rest
-		.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-			body: slashCommands.map((command) => command.toJSON()),
-		})
-		.then((data: any) => {
-			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", data.length)} slash command(s)`));
-			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", commands.length)} command(s)`));
-			logger.info(logColor("text", `🔥 Successfully loaded ${logColor("variable", client.buttonCommands.size)} button command(s)`));
-		})
-		.catch((e) => {
-			logger.error(`${e}`);
-		});
+	app.get("/", (_req: Request, res: Response) => res.send("<h1>Hello World!</h1>"));
+	app.put(Routes.applicationCommands(process.env.CLIENT_ID), (_req: Request, res: Response) => {
+		res.send(slashCommands.map((command) => command.toJSON()));
+	});
+	app.listen(port, () => logger.info(`Server listening at http://localhost:${port}`));
 };

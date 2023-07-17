@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { ISlashCommand } from "../../../types";
-import { prettyMilliseconds } from "../../../utils";
+import { convertToEpoch, prettyMilliseconds } from "../../../utils";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("uptime").setDescription("Get bot's uptime"),
@@ -11,7 +11,7 @@ const slashCommands: ISlashCommand = {
 				new EmbedBuilder()
 					.setColor("Random")
 					.addFields([
-						{ name: "Booted up on", value: `<t:${interaction.client.readyAt.getMilliseconds()}>`, inline: true },
+						{ name: "Booted up on", value: `<t:${convertToEpoch(interaction.client.readyAt)}>`, inline: true },
 						{ name: "Uptime", value: `${prettyMilliseconds(interaction.client.uptime)}`, inline: true },
 					])
 					.setTimestamp(),

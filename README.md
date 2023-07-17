@@ -5,6 +5,7 @@
 * 🟦 Typescript
 * 🔥 Slash commands (supports auto complete!)
 * ✉️ Message commands
+* 🔘 Button commands
 * 🕛 Cooldowns
 * 🏴 Detailed Permissions
 * 💪 Event & Command handlers
