@@ -12,9 +12,9 @@ if (!process.env.PREFIX) throw new Error("ERROR!!! Prefix is not set | Check you
 if (!process.env.TOKEN) throw new Error("ERROR!!! Token is not set | Check your .env");
 if (!process.env.MONGO_URI) throw new Error("ERROR!!! MONGO_URI is not set | Check your .env");
 if (!process.env.MONGO_DATABASE_NAME) throw new Error("ERROR!!! MONGO_DATABASE_NAME is not set | Check your .env");
-if (!process.env.Server_invite) logger.warn("WARNING!!! Server invite is not set | Set it in your .env");
-if (!process.env.Mangadex_Username) logger.warn("WARNING!!! Mangadex username is not set | Set it in your .env");
-if (!process.env.Mangadex_Password) logger.warn("WARNING!!! Mangadex password is not set | Set it in your .env");
+if (!process.env.SERVER_INVITE) logger.warn("WARNING!!! Server invite is not set | Set it in your .env");
+if (!process.env.MANGADEX_USERNAME) logger.warn("WARNING!!! Mangadex username is not set | Set it in your .env");
+if (!process.env.MANGADEX_PASSWORD) logger.warn("WARNING!!! Mangadex password is not set | Set it in your .env");
 if (!process.env.SAUCENAO_API_KEY) logger.warn("WARNING!!! SauceNao API key is not set | Set it in your .env");
 
 (async () => {

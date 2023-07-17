@@ -33,7 +33,7 @@ const embedStats = (
 				.setFields([
 					{ name: "Server Owner", value: `<@${guild.ownerId}>`, inline: true },
 					{ name: "Server Age", value: `${prettyMilliseconds(age)}`, inline: true },
-					{ name: "Server Permanent Link", value: `${process.env.Server_invite}`, inline: false },
+					{ name: "Server Permanent Link", value: `${process.env.SERVER_INVITE}`, inline: false },
 					{
 						name: "Server Created At",
 						value: `<t:${convertToEpoch(guild.createdAt)}:F>`,

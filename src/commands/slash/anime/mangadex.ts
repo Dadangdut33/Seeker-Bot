@@ -38,8 +38,8 @@ const slashCommands: ISlashCommand = {
 			const command = interaction.options.getSubcommand();
 			const query = interaction.options.getString("query", true);
 
-			const username = process.env.Mangadex_Username!;
-			const password = process.env.Mangadex_Password!;
+			const username = process.env.MANGADEX_USERNAME!;
+			const password = process.env.MANGADEX_PASSWORD!;
 			await interaction.deferReply();
 			await login(username, password);
 
