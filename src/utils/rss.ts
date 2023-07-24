@@ -48,6 +48,10 @@ export const run_rss = async (gid: string, type: string, feedurl: string, nyaa =
 		// if index is -1, then last found is not found in feed which means no cut
 		// slice feed from 0 to last found
 		if (index !== -1) feed.items = feed.items.slice(0, index);
+
+		// what we just did basically is to remove all feed that already sent
+		// Why we get the index in loop is because the feed is in a reverse order
+		// so the latest news is at the 0 index while the oldest (last feed) is at the last index
 	}
 
 	feed.items.reverse(); // reverse it first so it will be in correct order
@@ -128,6 +132,52 @@ export const send_crunchyroll = async (gid: string, type: string, feedurl: strin
 				},
 			])
 			.setColor("#f78a26")
+			.setFooter({ text: `${feed.title}` })
+			.setTimestamp();
+
+		if (item.guid) embed.setURL(item.guid);
+
+		embedList.push(embed);
+
+		if (embedList.length === 5) {
+			// send every 5 embeds
+			channel.send({ embeds: embedList });
+			embedList = [];
+		}
+	}
+
+	// send remaining embeds
+	if (embedList.length > 0) {
+		channel.send({ embeds: embedList });
+	}
+};
+
+export const send_ann = async (gid: string, type: string, feedurl: string, channel: TextChannel) => {
+	const feed = await run_rss(gid, type, feedurl);
+	if (!feed) return; // if feed is empty, then no new item and no need to send message
+
+	let embedList = [];
+	// iterate through feed and send rss info
+	for (const item of feed.items) {
+		const embed = new EmbedBuilder()
+			.setAuthor({
+				name: "AnimeNewsNetwork.com",
+				url: "https://AnimeNewsNetwork.com/",
+				iconURL: "https://media.discordapp.net/attachments/799595012005822484/1133063294119330004/unnamed.jpg",
+			})
+			.setTitle(item.title ? item.title : "Title not found")
+			.setDescription(
+				item.contentSnippet ? (item.contentSnippet.length > 500 ? item.contentSnippet.slice(0, 500) + "..." : item.contentSnippet) : "Contentsnippet not found"
+			)
+			.addFields([
+				{ name: "Categories", value: item.categories ? item.categories.join(", ") : "Uncategorized", inline: true },
+				{
+					name: "Published at",
+					value: item.isoDate ? `<t:${new Date(item.isoDate).valueOf() / 1000}>` : item.pubDate ? item.pubDate : "Date published at not found",
+					inline: true,
+				},
+			])
+			.setColor("#196d9e")
 			.setFooter({ text: `${feed.title}` })
 			.setTimestamp();
 
