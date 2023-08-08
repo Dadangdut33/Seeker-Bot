@@ -97,13 +97,15 @@ const event: IBotEvent = {
 						url: `https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id}`,
 					})
 					.setDescription(msg ? msg.toString() : "-")
-					.setImage(attachment)
 					.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
 					.setFooter({ text: footerChoice[Math.floor(Math.random() * footerChoice.length)] })
 					.setTimestamp();
 
 				if (msg.toString().length > 0) embed.setDescription(msg.toString());
-				if (attachment !== "") embed.addFields([{ name: `Attachment`, value: `[Link](${attachment})`, inline: true }]);
+				if (attachment !== "") {
+					embed.setImage(attachment);
+					embed.addFields([{ name: `Attachment`, value: `[Link](${attachment})`, inline: true }]);
+				}
 
 				// send the message 🚀
 				channel.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });

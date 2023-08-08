@@ -43,7 +43,6 @@ const event: IBotEvent = {
 
 				// if reactions >= 3, send it to the highlightChannel
 				if (count >= 3) {
-					logger.debug("dasdasd asd asda");
 					let data = {
 							guildID: guildID,
 							channelID: reaction.message.channel.id,
@@ -68,13 +67,15 @@ const event: IBotEvent = {
 							iconURL: msg.author.displayAvatarURL({ extension: "png", size: 2048 }),
 							url: `https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id}`,
 						})
-						.setImage(attachment)
 						.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
 						.setFooter({ text: `✨ Starred` })
 						.setTimestamp();
 
 					if (msg.toString().length > 0) embed.setDescription(msg.toString());
-					if (attachment !== "") embed.addFields([{ name: `Attachment`, value: `[Link](${attachment})`, inline: true }]);
+					if (attachment !== "") {
+						embed.setImage(attachment);
+						embed.addFields([{ name: `Attachment`, value: `[Link](${attachment})`, inline: true }]);
+					}
 
 					// send the message 🚀
 					channel.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
