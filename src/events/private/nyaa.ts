@@ -6,6 +6,7 @@ import { send_nyaa } from "../../utils/rss";
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
+	disabled: true,
 	loadMsg: `👀 Module: ${__filename} rss feed | Loading feed`,
 	execute: async (client: Client) => {
 		const gid = process.env.PERSONAL_SERVER_ID!,
