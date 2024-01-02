@@ -41,6 +41,8 @@ const event: IBotEvent = {
 					// add a reaction to the message
 					message.react("👍");
 					message.react("👎");
+					message.react("😂");
+					message.react("🤡");
 				}
 			} catch (e) {
 				logger.error(`[ERROR] [message-spotlight - adding reaction] ${e}`);
