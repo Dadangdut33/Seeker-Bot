@@ -55,18 +55,14 @@ const event: IBotEvent = {
 
 				const msg = await reaction.message.channel.messages.fetch(reaction.message.id); // fetch the message
 
-				try {
-					// get the msg and reactor object
-					const reactor = await msg.guild!.members.fetch(user.id);
-					
-					// make sure user is admin
-					if (!reactor.permissions.has("Administrator")) return;
-	
-					// check reaction content
-					if (!reaction.emoji.name!.includes("SETUJUBANH")) return;
-				} catch (error) {
-					logger.error(`[ERROR] [message-spotlight - checking reaction] ${error}`);
-				}
+				// get the msg and reactor object
+				const reactor = await msg.guild!.members.fetch(user.id);
+				
+				// make sure user is admin
+				if (!reactor.permissions.has("Administrator")) return;
+
+				// check reaction content
+				if (!reaction.emoji.name!.includes("SETUJUBANH")) return;
 
 				// -------------------------------------
 				// make sure it's not a dupe or already in the DB

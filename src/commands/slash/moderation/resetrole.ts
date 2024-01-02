@@ -13,15 +13,14 @@ const slashCommands: ISlashCommand = {
 		const roleToReset = interaction.options.getRole("role")!;
 		const guild = interaction.guild!;
 		await interaction.deferReply();
-		await interaction.reply("Resetting roles...");
 		try {
 			guild.members.cache.forEach((member) => {
 				member.roles.remove(roleToReset as Role);
 			});
-			interaction.editReply("__**Roles have been reset successfully!**__ Might take a while to see the changes.");
+			await interaction.editReply("__**Roles have been reset successfully!**__ Might take a while to see the changes.");
 		} catch (error) {
 			logger.error(`${error}`);
-			interaction.editReply("__**Something went wrong!**__\n```js\n" + error + "```");
+			await interaction.editReply("__**Something went wrong!**__\n```js\n" + error + "```");
 		}
 	},
 };
