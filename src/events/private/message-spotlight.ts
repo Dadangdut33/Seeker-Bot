@@ -18,8 +18,8 @@ const event: IBotEvent = {
 		if (!guild) return logger.warn("Invalid guild for message spotlight");
 
 		// get channel by id
-		const channel = guild.channels.cache.get(channelID) as TextChannel;
-		if (!channel) return logger.warn("Invalid channel for message spotlight");
+		const channel_spotlight = guild.channels.cache.get(channelID) as TextChannel;
+		if (!channel_spotlight) return logger.warn("Invalid channel for message spotlight");
 
 		client.on("messageReactionAdd", async (reaction, user) => {
 			try {
@@ -27,7 +27,7 @@ const event: IBotEvent = {
 				if (reaction.message.guild.id !== guild.id) return; // make sure it is in the same guild
 
 				// make sure reaction is not in news channel also make sure raction is not in same channel as highlightChannel
-				if (reaction.message.channel.type === ChannelType.GuildAnnouncement || reaction.message.channel === channel) return;
+				if (reaction.message.channel.type === ChannelType.GuildAnnouncement || reaction.message.channel === channel_spotlight) return;
 
 				// make sure everyone has access to it
 				if (!(reaction.message.channel as TextChannel).permissionsFor(reaction.message.guild.roles.everyone).has("ViewChannel")) return;
@@ -78,18 +78,17 @@ const event: IBotEvent = {
 					}
 
 					// send the message 🚀
-					channel.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
+					channel_spotlight.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
 
 					// -------------------------------------
 					// check if attachment is a video
 					// if a video then send it separately 🚀
-					if (attachment.includes(".mp4")) channel.send(attachment);
+					if (attachment.includes(".mp4")) channel_spotlight.send(attachment);
 
 					// if a video but embedded because it is a link 🚀
-					if (msg.embeds.length > 0) if (msg.embeds[0].video) channel.send(msg.embeds[0].video.url!);
+					if (msg.embeds.length > 0) if (msg.embeds[0].video) channel_spotlight.send(msg.embeds[0].video.url!);
 				}
 			} catch (e) {
-				logger.error(e)
 				logger.error(`[ERROR] [message-spotlight] ${e}`);
 			}
 		});

@@ -9,23 +9,23 @@ const event: IBotEvent = {
 	loadMsg: `👀 Module: ${__filename} loaded`,
 	execute: (client: Client) => {
 		const guildID = "913987561922396190",
-			channelID = "921456103722721303",
+			channel_monitor_ID = "921456103722721303",
 			hallOfFame = "955133343094165594";
 
-		if (!guildID || !channelID || !hallOfFame) return logger.warn("guild or channel ID not set!");
+		if (!guildID || !channel_monitor_ID || !hallOfFame) return logger.warn("guild or channel ID not set!");
 
 		// get guild by id
 		const guild = client.guilds.cache.get(guildID);
 		if (!guild) return logger.warn("Invalid guild for message spotlight");
 
 		// get channel by id
-		const channel = guild.channels.cache.get(channelID) as TextChannel;
-		if (!channel) return logger.warn("Invalid channel for message spotlight");
+		const channel_spotlight = guild.channels.cache.get(hallOfFame) as TextChannel;
+		if (!channel_spotlight) return logger.warn("Invalid channel for message spotlight");
 
 		// listener for a channel message
 		client.on("messageCreate", async (message) => {
 			try {
-				if (!channelID.includes(message.channel.id)) return;
+				if (!channel_monitor_ID.includes(message.channel.id)) return;
 				if (message.author.bot) return;
 
 				let imgExist = true;
@@ -49,7 +49,7 @@ const event: IBotEvent = {
 
 		client.on("messageReactionAdd", async (reaction, user) => {
 			try {
-				if (!channelID.includes(reaction.message.channel.id)) return;
+				if (!channel_monitor_ID.includes(reaction.message.channel.id)) return;
 
 				// get the msg and reactor object
 				const msg = await reaction.message.channel.messages.fetch(reaction.message.id);
@@ -108,18 +108,17 @@ const event: IBotEvent = {
 				}
 
 				// send the message 🚀
-				channel.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
+				channel_spotlight.send({ content: `<#${reaction.message.channel.id}> ${msg.author}`, embeds: [embed] });
 
 				// -------------------------------------
 				// check if attachment is a video
 				// if a video then send it separately 🚀
-				if (attachment.includes(".mp4")) channel.send(attachment);
+				if (attachment.includes(".mp4")) channel_spotlight.send(attachment);
 
 				// if a video but embedded because it is a link 🚀
-				if (msg.embeds.length > 0) if (msg.embeds[0].video) channel.send(msg.embeds[0].video.url!);
+				if (msg.embeds.length > 0) if (msg.embeds[0].video) channel_spotlight.send(msg.embeds[0].video.url!);
 			} catch (e) {
-				logger.error(e)
-				logger.error(`[ERROR] [message-spotlight]`);
+				logger.error(`[ERROR] [hall-of-fame] ${e}`);
 			}
 		});
 	},
