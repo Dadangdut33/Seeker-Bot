@@ -79,7 +79,7 @@ const event: IBotEvent = {
 				if (db_Data.length > 0) return; // if already in db, return
 
 				// insert to db if not already in db
-				insert_colname("hall_of_fame", data);
+				await insert_colname("hall_of_fame", data);
 
 				// -------------------------------------
 				// random footer
@@ -118,7 +118,8 @@ const event: IBotEvent = {
 				// if a video but embedded because it is a link 🚀
 				if (msg.embeds.length > 0) if (msg.embeds[0].video) channel.send(msg.embeds[0].video.url!);
 			} catch (e) {
-				logger.error(`[ERROR] [message-spotlight] ${e}`);
+				logger.error(e)
+				logger.error(`[ERROR] [message-spotlight]`);
 			}
 		});
 	},

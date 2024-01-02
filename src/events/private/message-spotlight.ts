@@ -89,6 +89,7 @@ const event: IBotEvent = {
 					if (msg.embeds.length > 0) if (msg.embeds[0].video) channel.send(msg.embeds[0].video.url!);
 				}
 			} catch (e) {
+				logger.error(e)
 				logger.error(`[ERROR] [message-spotlight] ${e}`);
 			}
 		});
