@@ -49,23 +49,24 @@ const event: IBotEvent = {
 
 		client.on("messageReactionAdd", async (reaction, user) => {
 			try {
-				if (!channel_monitor_ID.includes(reaction.message.channel.id)) return;
+				if (!reaction.message.guild) return; // make sure it is in a guild
+				if (reaction.message.guild.id !== guild.id) return; // make sure it is in the same guild
+				if (!channel_monitor_ID.includes(reaction.message.channel.id)) return; // make sure the correct channel is being monitored
 
-				// get the msg and reactor object
-				const msg = await reaction.message.channel.messages.fetch(reaction.message.id);
-				const reactor = await msg.guild!.members.fetch(user.id);
+				const msg = await reaction.message.channel.messages.fetch(reaction.message.id); // fetch the message
 
-				// make sure user is not bot
-				if (user.bot || msg.author.bot) return;
-
-				// make sure it is in the same guild
-				if (reaction.message.guild!.id !== guild.id) return;
-
-				// make sure user is admin
-				if (!reactor.permissions.has("Administrator")) return;
-
-				// check reaction content
-				if (!reaction.emoji.name!.includes("SETUJUBANH")) return;
+				try {
+					// get the msg and reactor object
+					const reactor = await msg.guild!.members.fetch(user.id);
+					
+					// make sure user is admin
+					if (!reactor.permissions.has("Administrator")) return;
+	
+					// check reaction content
+					if (!reaction.emoji.name!.includes("SETUJUBANH")) return;
+				} catch (error) {
+					logger.error(`[ERROR] [message-spotlight - checking reaction] ${error}`);
+				}
 
 				// -------------------------------------
 				// make sure it's not a dupe or already in the DB
