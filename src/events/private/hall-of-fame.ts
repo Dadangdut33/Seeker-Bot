@@ -96,7 +96,6 @@ const event: IBotEvent = {
 						iconURL: msg.author.displayAvatarURL({ extension: "png", size: 2048 }),
 						url: `https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id}`,
 					})
-					.setDescription(msg ? msg.toString() : "-")
 					.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
 					.setFooter({ text: footerChoice[Math.floor(Math.random() * footerChoice.length)] })
 					.setTimestamp();
@@ -113,10 +112,10 @@ const event: IBotEvent = {
 				// -------------------------------------
 				// check if attachment is a video
 				// if a video then send it separately 🚀
-				if (attachment.includes(".mp4")) channel_spotlight.send(attachment);
+				if (attachment.includes(".mp4")) channel_spotlight.send({ content: attachment });
 
 				// if a video but embedded because it is a link 🚀
-				if (msg.embeds.length > 0) if (msg.embeds[0].video) channel_spotlight.send(msg.embeds[0].video.url!);
+				if (msg.embeds.length > 0) if (msg.embeds[0].video) channel_spotlight.send({ content: msg.embeds[0].video.url! });
 			} catch (e) {
 				logger.error(`[ERROR] [hall-of-fame] ${e}`);
 			}
