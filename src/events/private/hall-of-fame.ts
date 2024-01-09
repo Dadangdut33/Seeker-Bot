@@ -42,7 +42,6 @@ const event: IBotEvent = {
 					message.react("👍");
 					message.react("👎");
 					message.react("😂");
-					message.react("🤡");
 				}
 			} catch (e) {
 				logger.error(`[ERROR] [message-spotlight - adding reaction] ${e}`);
@@ -82,7 +81,7 @@ const event: IBotEvent = {
 
 				// -------------------------------------
 				// random footer
-				const footerChoice = ["💎", "Worthy", "El caliente", "⭐⭐⭐⭐⭐", "Keren abangnya", "😂👆", "😂👆", "Awesome", "Fantastic", "Pengememe handal"];
+				const footerChoice = ["💎", "⭐⭐⭐⭐⭐", "😂👆", "😂👆", "Pengememe handal"];
 
 				// verify attachment
 				let attachment = msg.attachments.size > 0 ? msg.attachments.first()!.url : ""; // if an attachment (ANY)
