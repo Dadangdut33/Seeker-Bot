@@ -14,15 +14,40 @@ function AuditLog(client: Client, options: optionsInterface) {
 	client.on("messageDelete", (message) => {
 		if (message.author) if (message.author.bot) return;
 		if (message.channel.type === ChannelType.DM) return; // return if dm
-		if (message.attachments.size === 0) return;
 		if (debugmode) logger.debug(`Module: ${__filename} | messageDelete triggered`);
-
-		let embed: APIEmbed = {
+		let embedTop: APIEmbed = {
 			description: `
 **Author : ** <@${message.author!.id}> - *${message.author!.tag}*
 **Date : ** <t:${message.createdAt.valueOf() / 1000}:R>
 **Channel : ** <#${message.channel.id}> - *${message.channel.name}*
+`,
+			color: CUSTOM_COLORS.Black,
+			timestamp: new Date().toISOString(),
+			footer: {
+				text: `Deleted`,
+			},
+		};
 
+		send(client, message.guild!, options, embedTop);
+
+		if (message.content) {
+			// slice content in loop
+			for (let i = 0; i < message.content.length; i += 1024) {
+				const content = message.content.slice(i, i + 1024);
+				const embed: APIEmbed = {
+					description: content,
+					color: CUSTOM_COLORS.Black,
+				};
+				send(client, message.guild!, options, embed);
+			}
+			if (debugmode) logger.debug(`Module: ${__filename} | messageDelete (img) triggered`);
+		}
+
+		// send image / attachment if exist
+		if (message.attachments.size === 0) return;
+
+		let embed: APIEmbed = {
+			description: `
 **Deleted Image : **
 Original: \n${message.attachments.map((x) => x.url).join("\n")}
 
