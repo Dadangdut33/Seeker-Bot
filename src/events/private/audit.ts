@@ -10,15 +10,18 @@ interface optionsInterface {
 }
 
 function AuditLog(client: Client, options: optionsInterface) {
-	// *Deleted image | Only if the message contains image
-	client.on("messageDelete", (message) => {
+	// *Deleted message
+	client.on("messageDelete", async (message) => {
 		if (message.author) if (message.author.bot) return;
 		if (message.channel.type === ChannelType.DM) return; // return if dm
 		if (debugmode) logger.debug(`Module: ${__filename} | messageDelete triggered`);
 		let embedTop: APIEmbed = {
+			author: {
+				name: `✖️ A message Was Deleted`,
+			},
 			description: `
 **Author : ** <@${message.author!.id}> - *${message.author!.tag}*
-**Date : ** <t:${message.createdAt.valueOf() / 1000}:R>
+**Date : ** <t:${Math.floor(message.createdAt.valueOf() / 1000)}:R>
 **Channel : ** <#${message.channel.id}> - *${message.channel.name}*
 `,
 			color: CUSTOM_COLORS.Black,
@@ -28,7 +31,7 @@ function AuditLog(client: Client, options: optionsInterface) {
 			},
 		};
 
-		send(client, message.guild!, options, embedTop);
+		await send(client, message.guild!, options, embedTop);
 
 		if (message.content) {
 			// slice content in loop
@@ -38,9 +41,9 @@ function AuditLog(client: Client, options: optionsInterface) {
 					description: content,
 					color: CUSTOM_COLORS.Black,
 				};
-				send(client, message.guild!, options, embed);
+				await send(client, message.guild!, options, embed);
 			}
-			if (debugmode) logger.debug(`Module: ${__filename} | messageDelete (img) triggered`);
+			if (debugmode) logger.debug(`Module: ${__filename} | messageDelete triggered`);
 		}
 
 		// send image / attachment if exist
@@ -61,13 +64,10 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 			footer: {
 				text: `Deleted`,
 			},
-			author: {
-				name: `✖️ An Image Was Deleted`,
-			},
 		};
 
 		if (message && message.member && typeof message.member.guild === "object") {
-			send(client, message.member.guild, options, embed);
+			await send(client, message.member.guild, options, embed);
 		} else {
 			console.error(`Module: ${__filename} | messageDelete - ERROR - member guild id couldn't be retrieved`);
 			console.error("author", message.author);
@@ -76,8 +76,108 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 		}
 	});
 
+	// * Edited message
+	client.on("messageUpdate", async (oldMessage, newMessage) => {
+		if (oldMessage.author) if (oldMessage.author.bot) return;
+		if (oldMessage.channel.type === ChannelType.DM) return; // return if dm
+		if (debugmode) logger.debug(`Module: ${__filename} | messageUpdate triggered`);
+		let embedTop: APIEmbed = {
+			author: {
+				name: `✏️ A Message Was Edited`,
+			},
+			description: `
+**Author : ** <@${oldMessage.author!.id}> - *${oldMessage.author!.tag}*
+**Date : ** <t:${Math.floor(oldMessage.createdAt.valueOf() / 1000)}:R>
+**Channel : ** <#${oldMessage.channel.id}> - *${oldMessage.channel.name}*
+`,
+			color: CUSTOM_COLORS.Black,
+			timestamp: new Date().toISOString(),
+			footer: {
+				text: `Edited`,
+			},
+		};
+
+		await send(client, oldMessage.guild!, options, embedTop);
+
+		if (oldMessage.content) {
+			// slice content in loop
+			for (let i = 0; i < oldMessage.content.length; i += 1024) {
+				const content = oldMessage.content.slice(i, i + 1024);
+				const embed: APIEmbed = {
+					title: `Before ${i === 0 ? "" : "[Cont]"}`,
+					description: content,
+					color: CUSTOM_COLORS.Black,
+				};
+				await send(client, oldMessage.guild!, options, embed);
+			}
+			if (debugmode) logger.debug(`Module: ${__filename} | messageUpdate triggered (old content)`);
+		}
+
+		// send image / attachment if exist
+		if (oldMessage.attachments.size) {
+			try {
+				let embed: APIEmbed = {
+					description: `
+	**Edited Image : **
+	Original: \n${oldMessage.attachments.map((x) => x.url).join("\n")}
+	Proxy: \n${oldMessage.attachments.map((x) => x.proxyURL).join("\n")}
+	`,
+					image: {
+						url: oldMessage.attachments.map((x) => x.url)[0] || oldMessage.attachments.map((x) => x.proxyURL)[0] || "",
+					},
+					color: CUSTOM_COLORS.Black,
+					timestamp: new Date().toISOString(),
+					footer: {
+						text: `Attachment`,
+					},
+				};
+				await send(client, oldMessage.guild!, options, embed);
+			} catch (error) {
+				console.error(`Module: ${__filename} | messageUpdate - ERROR - image couldn't be retrieved`);
+			}
+		}
+
+		if (newMessage.content) {
+			// slice content in loop
+			for (let i = 0; i < newMessage.content.length; i += 1024) {
+				const content = newMessage.content.slice(i, i + 1024);
+				const embed: APIEmbed = {
+					title: `After ${i === 0 ? "" : "[Cont]"}`,
+					description: content,
+					color: CUSTOM_COLORS.Black,
+				};
+				await send(client, newMessage.guild!, options, embed);
+			}
+			if (debugmode) logger.debug(`Module: ${__filename} | messageUpdate triggered (new content)`);
+		}
+
+		// send image / attachment if exist
+		if (newMessage.attachments.size) {
+			try {
+				let embed: APIEmbed = {
+					description: `
+	**Edited Image : **
+	Original: \n${newMessage.attachments.map((x) => x.url).join("\n")}
+	Proxy: \n${newMessage.attachments.map((x) => x.proxyURL).join("\n")}
+	`,
+					image: {
+						url: newMessage.attachments.map((x) => x.url)[0] || newMessage.attachments.map((x) => x.proxyURL)[0] || "",
+					},
+					color: CUSTOM_COLORS.Black,
+					timestamp: new Date().toISOString(),
+					footer: {
+						text: `Attachment`,
+					},
+				};
+				await send(client, newMessage.guild!, options, embed);
+			} catch (error) {
+				console.error(`Module: ${__filename} | messageUpdate - ERROR - image couldn't be retrieved`);
+			}
+		}
+	});
+
 	// *USER NICKNAME UPDATE
-	client.on("guildMemberUpdate", (oldMember, newMember) => {
+	client.on("guildMemberUpdate", async (oldMember, newMember) => {
 		if (debugmode) logger.debug(`Module: ${__filename} | guildMemberUpdate:nickname triggered`);
 		if (oldMember.nickname !== newMember.nickname) {
 			let embed: APIEmbed = {
@@ -107,12 +207,12 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 					},
 				],
 			};
-			send(client, newMember.guild, options, embed);
+			await send(client, newMember.guild, options, embed);
 		}
 	});
 
 	// *USER UPDATE AVATAR, USERNAME, DISCRIMINATOR
-	client.on("userUpdate", (oldUser, newUser) => {
+	client.on("userUpdate", async (oldUser, newUser) => {
 		if (debugmode) logger.debug(`Module: ${__filename} | userUpdate triggered`);
 
 		// Log type
@@ -121,8 +221,8 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 			avatarChangedMsg: APIEmbed | null = null;
 
 		// search the member from all guilds, since the userUpdate event doesn't provide guild information as it is a global event.
-		client.guilds.cache.forEach(function (guild, guildid) {
-			guild.members.cache.forEach(function (member, memberid) {
+		client.guilds.cache.forEach(async function (guild, guildid) {
+			guild.members.cache.forEach(async function (member, memberid) {
 				if (newUser.id === memberid) {
 					// USERNAME CHANGED
 					if (oldUser.username !== newUser.username) {
@@ -215,16 +315,16 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 						};
 					}
 
-					if (usernameChangedMsg) send(client, guild, options, usernameChangedMsg);
-					if (discriminatorChangedMsg) send(client, guild, options, discriminatorChangedMsg);
-					if (avatarChangedMsg) send(client, guild, options, avatarChangedMsg);
+					if (usernameChangedMsg) await send(client, guild, options, usernameChangedMsg);
+					if (discriminatorChangedMsg) await send(client, guild, options, discriminatorChangedMsg);
+					if (avatarChangedMsg) await send(client, guild, options, avatarChangedMsg);
 				}
 			});
 		});
 	});
 
 	// SEND FUNCTION
-	function send(client: Client, guild: Guild, opt: optionsInterface, embed: APIEmbed) {
+	async function send(client: Client, guild: Guild, opt: optionsInterface, embed: APIEmbed) {
 		try {
 			let cur_opt = opt.options.find((val) => val.guildID === guild.id);
 
@@ -254,7 +354,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 
 			if (debugmode) logger.debug(`Module: ${__filename} | send - sending embed to ${channel.name}`);
 
-			(channel as TextChannel).send({ embeds: [embed] }).catch(console.error);
+			await (channel as TextChannel).send({ embeds: [embed] }).catch(console.error);
 		} catch (error) {
 			logger.error(`Module: ${__filename} | send - error`, error);
 		}

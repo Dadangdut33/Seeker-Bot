@@ -3,7 +3,7 @@ import { logger } from "../logger";
 
 module.exports = (client: Client) => {
 	process.on("unhandledRejection", async (reason, promise) => {
-		logger.error(`[Anti-crash] Unhandled promise rejection: ${reason} at ${promise}`);
+		logger.error(`[Anti-crash] Unhandled promise rejection: ${reason} | ${promise}`);
 	});
 
 	process.on("uncaughtException", (e) => {
