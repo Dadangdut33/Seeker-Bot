@@ -61,9 +61,6 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 			},
 			color: CUSTOM_COLORS.Black,
 			timestamp: new Date().toISOString(),
-			footer: {
-				text: `Deleted`,
-			},
 		};
 
 		if (message && message.member && typeof message.member.guild === "object") {
@@ -92,9 +89,6 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 `,
 			color: CUSTOM_COLORS.Black,
 			timestamp: new Date().toISOString(),
-			footer: {
-				text: `Edited`,
-			},
 		};
 
 		await send(client, oldMessage.guild!, options, embedTop);
@@ -104,7 +98,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 			for (let i = 0; i < oldMessage.content.length; i += 1024) {
 				const content = oldMessage.content.slice(i, i + 1024);
 				const embed: APIEmbed = {
-					title: `Before ${i === 0 ? "" : "[Cont]"}`,
+					title: i === 0 ? `Before` : undefined,
 					description: content,
 					color: CUSTOM_COLORS.Black,
 				};
@@ -142,7 +136,7 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 			for (let i = 0; i < newMessage.content.length; i += 1024) {
 				const content = newMessage.content.slice(i, i + 1024);
 				const embed: APIEmbed = {
-					title: `After ${i === 0 ? "" : "[Cont]"}`,
+					title: i === 0 ? `After` : undefined,
 					description: content,
 					color: CUSTOM_COLORS.Black,
 				};
