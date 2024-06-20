@@ -78,6 +78,8 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 		if (oldMessage.author) if (oldMessage.author.bot) return;
 		if (oldMessage.channel.type === ChannelType.DM) return; // return if dm
 		if (debugmode) logger.debug(`Module: ${__filename} | messageUpdate triggered`);
+		// dont send if content is same
+		if (oldMessage.content === newMessage.content) return;
 		let embedTop: APIEmbed = {
 			author: {
 				name: `✏️ A Message Was Edited`,
