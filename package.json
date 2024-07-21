@@ -6,7 +6,7 @@
 	"private": true,
 	"scripts": {
 		"start": "node prod/index.js",
-		"build": "npm install && tsc",
+		"build": "pnpm install && tsc",
 		"build:run": "node prod/index.js",
 		"build:watch": "nodemon prod/index.js",
 		"dev": "rimraf prod && tsc && node prod/index.js",
@@ -57,9 +57,6 @@
 		"weather-js": "^2.0.0",
 		"youtubei": "^1.1.2",
 		"ytdl-core": "^4.11.5"
-	},
-	"engines": {
-		"node": ">=16.x"
 	},
 	"devDependencies": {
 		"@types/chance": "^1.1.3",

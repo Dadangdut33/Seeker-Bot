@@ -4,8 +4,6 @@ import { IBotEvent } from "../types";
 import { logger } from "../logger";
 
 module.exports = (client: Client) => {
-	client.setMaxListeners(25); // set max listeners to 25 (Default is 10)
-
 	let counter = 0;
 
 	logger.info(logColor("text", `🔥 Loading events...`));
