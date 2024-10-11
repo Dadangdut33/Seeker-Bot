@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { capitalizeTheFirstLetterOfEachWord } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { capitalizeTheFirstLetterOfEachWord } from "@/utils";
 import ct from "countries-and-timezones";
 const cities = require("all-the-cities");
 

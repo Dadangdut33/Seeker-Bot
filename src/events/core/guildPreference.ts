@@ -1,8 +1,9 @@
 import { Client } from "discord.js";
-import { IBotEvent, IGuild } from "../../types";
-import { logger } from "../../logger";
-import { deleteOne_model, find_model, insert_model } from "../../utils/db";
-import { GuildModel } from "../../schemas";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
+import { db } from "@/utils/db";
+import { ServerConfig, ServerConfigType } from "@/utils/db/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * @description
@@ -17,9 +18,10 @@ const event: IBotEvent = {
 		try {
 			logger.info("⚙️ Loading guilds preferences...");
 			const current_guilds_id_list = client.guilds.cache.map((guild) => guild.id);
-			const fetched_from_db = (await find_model(GuildModel, {})) as IGuild[];
+			// const fetched_from_db = (await find_model(GuildModel, {})) as IGuild[];
+			const fetched_from_db = await db.query.ServerConfig.findMany();
 			fetched_from_db.forEach((res) => {
-				client.guildPreferences.set(res.guildID, res);
+				client.guildPreferences.set(res.guild_id, res);
 			});
 
 			logger.debug(`📥 Fetched ${current_guilds_id_list.length} guilds from cache`);
@@ -28,9 +30,9 @@ const event: IBotEvent = {
 			// clean db from guilds that are not in the cache (might be because of bot is kicked from the guild)
 			logger.info("🧹 Cleaning guilds preferences... (if any)");
 			fetched_from_db.forEach(async (guild) => {
-				if (!current_guilds_id_list.includes(guild.guildID)) {
-					logger.debug(`🗑️ Guild ${guild.guildID} is not in the cache, deleting from db...`);
-					await deleteOne_model(GuildModel, { guildID: guild.guildID }).catch((e) => logger.error(e));
+				if (!current_guilds_id_list.includes(guild.guild_id)) {
+					logger.debug(`🗑️ Guild ${guild.guild_id} is not in the cache, deleting from db...`);
+					await db.delete(ServerConfig).where(eq(ServerConfig.guild_id, guild.guild_id));
 				}
 			});
 			logger.info("🧹 Done!");
@@ -42,15 +44,16 @@ const event: IBotEvent = {
 					logger.debug(`📥 Guild ${guildID} is not in the db, adding...`);
 					// if not in db
 					const joinedAt = client.guilds.cache.get(guildID)?.joinedAt || new Date();
-					const new_guild: IGuild = {
-						guildID: guildID,
-						joinedAt: joinedAt,
+					const new_guild: ServerConfigType = {
+						guild_id: guildID,
+						joined_at: joinedAt,
 						options: {
 							prefix: process.env.PREFIX,
 						},
 					};
 
-					await insert_model(GuildModel, new_guild).catch((e) => logger.error(e));
+					// await insert_model(GuildModel, new_guild).catch((e) => logger.error(e));
+					await db.insert(ServerConfig).values(new_guild);
 					client.guildPreferences.set(guildID, new_guild);
 				}
 			});

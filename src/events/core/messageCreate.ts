@@ -1,9 +1,9 @@
 import { ChannelType, Message } from "discord.js";
-import { checkPermissions, getGuildOption, sendTimedMessage } from "../../utils";
-import { IBotEvent } from "../../types";
-import mongoose from "mongoose";
-import { crosspost, detectAnimeSearch, detectHaiku, detectMangaSearch } from "../../utils/events/listener";
-import { logger } from "../../logger";
+import { checkPermissions, sendTimedMessage } from "@/utils";
+import { IBotEvent } from "@/types";
+import { crosspost, detectAnimeSearch, detectHaiku, detectMangaSearch } from "@/utils/events/listener";
+import { logger } from "@/logger";
+import { getGuildOption } from "@/utils/server";
 
 const event: IBotEvent = {
 	name: "messageCreate",
@@ -11,11 +11,8 @@ const event: IBotEvent = {
 	execute: async (message: Message) => {
 		if (!message.member || message.member.user.bot) return;
 		if (!message.guild) return; // Prevent DMs
-		let prefix = process.env.PREFIX;
-		if (mongoose.connection.readyState === 1) {
-			let guildPrefix = await getGuildOption(message.client, message.guild, "prefix");
-			if (guildPrefix) prefix = guildPrefix;
-		}
+
+		const prefix = await getGuildOption(message.client, message.guild, "prefix");
 
 		// Global events that is not related to commands
 		if (!message.content.startsWith(prefix)) {

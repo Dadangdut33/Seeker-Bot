@@ -1,12 +1,15 @@
 import { ActionRowBuilder, ButtonBuilder, Client, TextChannel } from "discord.js";
-import { IBotEvent } from "../../types";
+import { IBotEvent } from "@/types";
 import { CronJob } from "cron";
-import { embedRandomAyat } from "../../utils/commands/verse";
-import { logger } from "../../logger";
+import { embedRandomAyat } from "@/utils/commands/verse";
+import { logger } from "@/logger";
 
-const cronFunc = async (channel: TextChannel) => {
+const cronFunc = async (channel: TextChannel): Promise<void> => {
 	const data = await embedRandomAyat();
-	if (!data) return logger.error("[ERROR] [daily-surah] Failed to get random ayat");
+	if (!data) {
+		logger.error("[ERROR] [daily-surah] Failed to get random ayat");
+		return;
+	}
 
 	// Surah number and ayat is in the title of the first embed with format like this [surah:number] xxx (xxx) - xxx
 	// get each of it

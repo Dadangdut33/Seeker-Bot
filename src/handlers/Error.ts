@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { logger } from "../logger";
+import { logger } from "@/logger";
 
 module.exports = (client: Client) => {
 	process.on("unhandledRejection", async (reason, promise) => {

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 import { validateURL, getInfo, chooseFormat, getVideoID } from "ytdl-core";
 
 async function highestVideo(url: string) {

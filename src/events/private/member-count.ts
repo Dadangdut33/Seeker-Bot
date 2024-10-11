@@ -1,22 +1,23 @@
 import { Client, Guild } from "discord.js";
-import { IBotEvent } from "../../types";
-import { logger } from "../../logger";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
+import { env } from "@/env";
 
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
 	loadMsg: `👀 Module: ${__filename} Loaded | Now waiting for new members...`,
 	execute: (client: Client) => {
-		const guildID = process.env.PERSONAL_SERVER_ID!,
-			channelID = process.env.PERSONAL_SERVER_MEMBER_COUNT_ID!;
+		const g_id = env.PERSONAL_SERVER_ID!,
+			ch_id = env.PERSONAL_SERVER_MEMBER_COUNT_ID!;
 
-		if (!guildID || !channelID) return logger.warn("guild or channel ID not set!");
+		if (!g_id || !ch_id) return logger.warn("guild or channel ID not set!");
 
-		const theGuild = client.guilds.cache.get(guildID);
+		const theGuild = client.guilds.cache.get(g_id);
 		if (!theGuild) return logger.warn("Invalid guild for member count");
 
 		try {
-			const theID = channelID;
+			const theID = ch_id;
 			const updateMembers = (guild: Guild) => {
 				const theChannel = guild.channels.cache.get(theID);
 				if (theChannel) theChannel.setName(`Total Members: ${guild.memberCount}`);

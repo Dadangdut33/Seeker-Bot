@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 import figlet from "figlet";
-import { logger } from "../../../logger";
+import { logger } from "@/logger";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()

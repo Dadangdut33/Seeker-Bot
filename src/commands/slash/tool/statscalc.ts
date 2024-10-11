@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 let isNumber = require("isnumber");
 
 const slashCommands: ISlashCommand = {

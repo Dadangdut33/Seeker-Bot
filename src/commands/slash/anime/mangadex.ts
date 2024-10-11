@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { btnPrompter, convertToEpoch, interactionBtnPaginator } from "../../../utils";
-import { logger } from "../../../logger";
+import { ISlashCommand } from "@/types";
+import { btnPrompter, convertToEpoch, interactionBtnPaginator } from "@/utils";
+import { logger } from "@/logger";
 import { Manga, login, resolveArray } from "mangadex-full-api";
 
 const slashCommands: ISlashCommand = {
@@ -69,7 +69,7 @@ const slashCommands: ISlashCommand = {
 					.setColor("#2E51A2")
 					.setAuthor({
 						name: "Mangadex.org",
-						iconURL: "https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png",
+						iconURL: "https://mangadex.org/favicon.ico",
 						url: "https://mangadex.org/",
 					})
 					.setTitle(`Please Choose The Manga That You Are Searching For Below`)
@@ -118,7 +118,7 @@ const slashCommands: ISlashCommand = {
 						.setColor("#e6613e")
 						.setAuthor({
 							name: `${title} - ${chapterTotal} Chapter ${volume ? `(${volume} Volume)` : ``} | ${originLang} ${englishOnly ? "- en" : "- all"}`,
-							iconURL: `https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png`,
+							iconURL: `https://mangadex.org/favicon.ico`,
 							url: link,
 						})
 						.setThumbnail(cover)
@@ -187,7 +187,7 @@ const slashCommands: ISlashCommand = {
 							.setColor("#e6613e")
 							.setAuthor({
 								name: `${title} - Chapter ${chGet.chapter} | ${originLang} - ${chGet.translatedLanguage}`,
-								iconURL: `https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png`,
+								iconURL: `https://mangadex.org/favicon.ico`,
 								url: `https://mangadex.org/chapter/${chGet.id}/`,
 							})
 							.setImage(pages[i])
@@ -212,7 +212,7 @@ const slashCommands: ISlashCommand = {
 						.setColor("#e6613e")
 						.setAuthor({
 							name: `${title} - Chapter ${chGet.chapter} | ${originLang} - ${chGet.translatedLanguage}`,
-							iconURL: `https://media.discordapp.net/attachments/799595012005822484/936142797994590288/xbt_jW78_400x400.png`,
+							iconURL: `https://mangadex.org/favicon.ico`,
 							url: `https://mangadex.org/chapter/${chGet.id}/`,
 						})
 						.setThumbnail(cover)

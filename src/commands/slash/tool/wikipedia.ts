@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { logger } from "../../../logger";
-import axios from "axios";
+import { ISlashCommand } from "@/types";
+import { logger } from "@/logger";
+import axios, { AxiosError } from "axios";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()
@@ -114,7 +114,7 @@ const slashCommands: ISlashCommand = {
 				.setTimestamp();
 
 			return interaction.editReply({ embeds: [embed] });
-		} catch (error) {
+		} catch (error: AxiosError | any) {
 			if (error.response.status === 403) return interaction.editReply("Wikipedia is down, try again later.");
 			if (error.response.status === 404) return interaction.editReply(`I couldn't find that article on Wikipedia or maybe you type it wrong?`);
 			else {

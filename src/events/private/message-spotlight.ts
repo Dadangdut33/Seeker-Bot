@@ -1,24 +1,27 @@
 import { ChannelType, Client, EmbedBuilder, TextChannel } from "discord.js";
-import { IBotEvent } from "../../types";
-import { logger } from "../../logger";
-import { find_colname, insert_colname } from "../../utils";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
+import { env } from "@/env";
+import { db } from "@/utils/db";
+import { MessageSpotlight } from "@/utils/db/schema";
+import { and, eq } from "drizzle-orm";
 
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
 	loadMsg: `👀 Module: ${__filename} loaded`,
 	execute: (client: Client) => {
-		const guildID = process.env.PERSONAL_SERVER_ID!,
-			channelID = process.env.PERSONAL_SERVER_SPOTLIGHT_CHANNEL_ID!;
+		const g_id = env.PERSONAL_SERVER_ID!,
+			ch_id = env.PERSONAL_SERVER_SPOTLIGHT_CHANNEL_ID!;
 
-		if (!guildID || !channelID) return logger.warn("guild or channel ID not set!");
+		if (!g_id || !ch_id) return logger.warn("guild or channel ID not set!");
 
 		// get guild by id
-		const guild = client.guilds.cache.get(guildID);
+		const guild = client.guilds.cache.get(g_id);
 		if (!guild) return logger.warn("Invalid guild for message spotlight");
 
 		// get channel by id
-		const channel_spotlight = guild.channels.cache.get(channelID) as TextChannel;
+		const channel_spotlight = guild.channels.cache.get(ch_id) as TextChannel;
 		if (!channel_spotlight) return logger.warn("Invalid channel for message spotlight");
 
 		client.on("messageReactionAdd", async (reaction, user) => {
@@ -43,18 +46,15 @@ const event: IBotEvent = {
 
 				// if reactions >= 3, send it to the highlightChannel
 				if (count >= 3) {
-					let data = {
-							guildID: guildID,
-							channelID: reaction.message.channel.id,
-							messageID: reaction.message.id,
-						},
-						db_Data = (await find_colname("spotlighted_message", data)) as (typeof data)[];
-
 					// if already in db, return
-					if (db_Data.length > 0) return;
+					const found = await db.query.MessageSpotlight.findFirst({
+						where: and(eq(MessageSpotlight.guild_id, g_id), eq(MessageSpotlight.ch_id, reaction.message.channel.id), eq(MessageSpotlight.msg_id, reaction.message.id)),
+					});
+
+					if (found) return;
 
 					// insert to db
-					await insert_colname("spotlighted_message", data);
+					await db.insert(MessageSpotlight).values({ guild_id: g_id, ch_id: reaction.message.channel.id, msg_id: reaction.message.id });
 
 					// verify attachment
 					let attachment = msg.attachments.size > 0 ? msg.attachments.first()!.url : ""; // if an attachment (ANY)
@@ -65,9 +65,9 @@ const event: IBotEvent = {
 						.setAuthor({
 							name: msg.author.username,
 							iconURL: msg.author.displayAvatarURL({ extension: "png", size: 2048 }),
-							url: `https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id}`,
+							url: `https://discord.com/channels/${g_id}/${reaction.message.channel.id}/${reaction.message.id}`,
 						})
-						.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
+						.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${g_id}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
 						.setFooter({ text: `✨ Starred` })
 						.setTimestamp();
 

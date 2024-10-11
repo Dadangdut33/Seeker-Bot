@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 import axios from "axios";
 
 const slashCommands: ISlashCommand = {

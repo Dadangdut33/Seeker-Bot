@@ -1,8 +1,8 @@
 import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { embedRandomAyat, embedSurah } from "../../../utils/commands/verse";
-import { logger } from "../../../logger";
-import { interactionBtnPaginator } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { embedRandomAyat, embedSurah } from "@/utils/commands/verse";
+import { logger } from "@/logger";
+import { interactionBtnPaginator } from "@/utils";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()

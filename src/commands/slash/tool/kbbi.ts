@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 import axios from "axios";
 import { load } from "cheerio";
 import { htmlToText } from "html-to-text";

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { convertToEpoch } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { convertToEpoch } from "@/utils";
 const weather = require("weather-js");
 
 const slashCommands: ISlashCommand = {

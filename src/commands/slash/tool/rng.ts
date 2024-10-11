@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 
 function getRandomIntInclusive(min: number, max: number) {
 	min = Math.ceil(min);

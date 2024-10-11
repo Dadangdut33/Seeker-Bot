@@ -1,23 +1,15 @@
-import { IMusicSession } from "../../types";
-import { logger } from "../../logger";
+import { IMusicQueue } from "@/types";
+import { logger } from "@/logger";
 import { CacheType, ChatInputCommandInteraction, Client, Guild, TextChannel, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import {
-	find_colname,
-	insert_colname,
-	updateOne_colname,
-	randomDiscordColor,
-	fancyTimeFormat,
-	btnPrompter,
-	convertToEpoch,
-	fancyTimeFormatMs,
-	interactionBtnPaginator,
-} from "../../utils";
+import { randomDiscordColor, fancyTimeFormat, btnPrompter, convertToEpoch, fancyTimeFormatMs, interactionBtnPaginator, db } from "@/utils";
 import { AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel, NoSubscriberBehavior } from "@discordjs/voice";
 import { search, stream } from "play-dl";
 import { Client as ytClient, PlaylistCompact, VideoCompact } from "youtubei";
 import { getInfo, validateURL, videoInfo } from "ytdl-core";
 import Genius from "genius-lyrics";
 import { splitBar } from "string-progressbar";
+import { MusicState, MusicStateType } from "../db/schema";
+import { eq, sql } from "drizzle-orm";
 const searchClient = new ytClient();
 
 export const registerPlayerEvent = async (client: Client, guild: Guild) => {
@@ -31,14 +23,15 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 		if (!getVoiceConnection(guild.id)) return;
 
 		// get queue data & verify if guild is registered or not
-		let queueData = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
-		if (!queueData || queueData.length === 0) {
-			insert_colname("music_state", { gid: guild.id, vc_id: "", tc_id: "", queue: [] });
+		let queueData = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, guild.id) });
+
+		if (!queueData) {
+			await db.insert(MusicState).values({ guild_id: guild.id, vc_id: "", tc_id: "", queue: [] });
 			return;
 		}
 
 		// Get text channel if registered
-		const textChannel = client.channels.cache.get(queueData[0].tc_id) as TextChannel;
+		const textChannel = client.channels.cache.get(queueData.tc_id) as TextChannel;
 		const msgInfo = await textChannel.send({ embeds: [{ title: "Loading queue...", color: 0x00ff00 }] });
 
 		try {
@@ -48,7 +41,7 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 				const resource = createAudioResource(streamInfo.stream, { inlineVolume: true, inputType: streamInfo.type });
 
 				mp.player.play(resource);
-				client.musicPlayers.get(guild.id)!.seekTime = 0;
+				mp.seekTime = 0;
 
 				// send message to channel
 				msgInfo.edit({
@@ -63,7 +56,7 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 				msgInfo.edit({ embeds: [{ title: `⏳ Loading next video in autoplay`, description: `Please wait...`, color: randomDiscordColor() }] });
 
 				// update related id taken this session
-				client.musicPlayers.get(guild.id)!.relatedIdTakenThisSession.push(mp.currentId);
+				mp.relatedIdTakenThisSession.push(mp.currentId);
 
 				// get related videos
 				const relatedGet = await searchClient.getVideo(mp.currentId);
@@ -85,10 +78,10 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 				const resource = createAudioResource(streamData.stream, { inlineVolume: true, inputType: streamData.type });
 
 				mp.player.play(resource);
-				client.musicPlayers.get(guild.id)!.currentId = nextVideo.id;
-				client.musicPlayers.get(guild.id)!.currentTitle = nextVideo.title;
-				client.musicPlayers.get(guild.id)!.currentUrl = urlGet;
-				client.musicPlayers.get(guild.id)!.seekTime = 0;
+				mp.currentId = nextVideo.id;
+				mp.currentTitle = nextVideo.title;
+				mp.currentUrl = urlGet;
+				mp.seekTime = 0;
 
 				// edit embed
 				msgInfo.edit({
@@ -127,7 +120,7 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 			}
 
 			// *if not loop and auto. Check if queue is empty or not
-			const queue = queueData[0].queue;
+			const { queue } = queueData;
 			if (queue.length > 0) {
 				// *if queue is not empty
 				const nextSong = queue.shift()!;
@@ -135,12 +128,12 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 				const resource = createAudioResource(streamInfo.stream, { inlineVolume: true, inputType: streamInfo.type });
 
 				mp.player.play(resource);
-				client.musicPlayers.get(guild.id)!.currentId = nextSong.id;
-				client.musicPlayers.get(guild.id)!.currentTitle = nextSong.title;
-				client.musicPlayers.get(guild.id)!.currentUrl = nextSong.link;
-				client.musicPlayers.get(guild.id)!.seekTime = 0;
-				client.musicPlayers.get(guild.id)!.query = nextSong.query;
-				updateOne_colname("music_state", { gid: guild.id }, { $set: { queue: queue } }); // update queue data
+				mp.currentId = nextSong.id;
+				mp.currentTitle = nextSong.title;
+				mp.currentUrl = nextSong.link;
+				mp.seekTime = 0;
+				mp.query = nextSong.query;
+				await db.update(MusicState).set({ queue: queue }).where(eq(MusicState.guild_id, guild.id)); // update queue data
 
 				// send message to channel
 				msgInfo.edit({
@@ -148,8 +141,8 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 				});
 			} else {
 				// *if queue is empty
-				updateOne_colname("music_state", { gid: guild.id }, { $set: { queue: [] } }); // update queue data
-				client.musicPlayers.get(guild.id)!.seekTime = 0;
+				await db.update(MusicState).set({ queue: [] }).where(eq(MusicState.guild_id, guild.id));
+				mp.seekTime = 0;
 
 				// send message telling finished playing all songs
 				msgInfo.edit({
@@ -167,7 +160,7 @@ export const registerPlayerEvent = async (client: Client, guild: Guild) => {
 					if (getVoiceConnection(guild.id)) getVoiceConnection(guild.id)?.destroy();
 					else guild.members.me?.voice.disconnect();
 
-					client.musicPlayers.get(guild.id)!.relatedIdTakenThisSession = []; // reset relatedIdTaken
+					mp.relatedIdTakenThisSession = []; // reset relatedIdTaken
 					mp.player.stop(); // stop player
 				}, 300000); // 5 minutes
 			}
@@ -307,10 +300,10 @@ export const clear = async (interaction: ChatInputCommandInteraction<CacheType>)
 	if (!mp) return interaction.editReply({ content: msg, allowedMentions: { repliedUser: false } });
 
 	// clear queue data
-	let queueData = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
+	let queueData = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, guild.id) });
 
-	if (queueData.length === 0) insert_colname("music_state", { gid: guild.id, vc_id: user.voice.channelId, tc_id: interaction.channelId, queue: [] });
-	else updateOne_colname("music_state", { gid: guild.id }, { $set: { queue: [] } });
+	if (!queueData) await db.insert(MusicState).values({ guild_id: guild.id, vc_id: user.voice.channelId ?? "", tc_id: interaction.channelId, queue: [] });
+	else await db.update(MusicState).set({ queue: [] }).where(eq(MusicState.guild_id, guild.id));
 
 	return interaction.editReply({ content: `⏹ **Queue Cleared.**`, allowedMentions: { repliedUser: false } });
 };
@@ -326,16 +319,16 @@ export const remove = async (interaction: ChatInputCommandInteraction<CacheType>
 	if (!mp) return interaction.editReply({ content: msg, allowedMentions: { repliedUser: false } });
 
 	const index = interaction.options.getInteger("index", true);
-	let queueData = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
+	let queueData = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, guild.id) });
 
-	if (queueData.length === 0) insert_colname("music_state", { gid: guild.id, vc_id: user.voice.channelId, tc_id: interaction.channelId, queue: [] });
+	if (!queueData) await db.insert(MusicState).values({ guild_id: guild.id, vc_id: user.voice.channelId ?? "", tc_id: interaction.channelId, queue: [] });
 	else {
-		const queue = queueData[0].queue;
+		const queue = queueData.queue;
 		if (queue.length === 0) return interaction.editReply({ content: `⛔ **Queue is empty!**`, allowedMentions: { repliedUser: false } });
 		if (index > queue.length || index < 1) return interaction.editReply({ content: `⛔ **Index out of range!**`, allowedMentions: { repliedUser: false } });
 
 		const removedSong = queue.splice(index - 1, 1);
-		updateOne_colname("music_state", { gid: guild.id }, { $set: { queue: queue } });
+		await db.update(MusicState).set({ queue: queue }).where(eq(MusicState.guild_id, guild.id));
 
 		return interaction.editReply({
 			content: `✅ **Removed ${removedSong[0].title} - (${removedSong[0].link}) from queue!**`,
@@ -482,9 +475,9 @@ export const skip = async (interaction: ChatInputCommandInteraction<CacheType>) 
 		}
 
 		// get queue data
-		const queueData = (await find_colname("music_state", { gid: interaction.guildId })) as IMusicSession[];
-		if (queueData.length > 0) {
-			const queue = queueData[0].queue;
+		const queueData = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, interaction.guildId!) });
+		if (queueData) {
+			const { queue } = queueData;
 
 			if (queue.length > 0) {
 				const nextSong = queue.shift()!;
@@ -498,7 +491,7 @@ export const skip = async (interaction: ChatInputCommandInteraction<CacheType>) 
 				mp.query = mp.query;
 
 				// update queue data
-				updateOne_colname("music_state", { gid: interaction.guildId }, { $set: { queue: queue } });
+				await db.update(MusicState).set({ queue: queue }).where(eq(MusicState.guild_id, interaction.guildId!));
 
 				await interaction.editReply({
 					embeds: [{ title: `⏩ Skipped current song!`, description: `Now playing: [${nextSong.title}](${nextSong.link})`, color: randomDiscordColor() }],
@@ -513,7 +506,7 @@ export const skip = async (interaction: ChatInputCommandInteraction<CacheType>) 
 				}
 
 				// update queue data
-				updateOne_colname("music_state", { gid: interaction.guildId }, { $set: { queue: [] } });
+				await db.update(MusicState).set({ queue: [] }).where(eq(MusicState.guild_id, interaction.guildId!));
 
 				// send message telling finished playing all songs
 				await interaction.editReply({
@@ -523,9 +516,9 @@ export const skip = async (interaction: ChatInputCommandInteraction<CacheType>) 
 				});
 			}
 		} else {
-			const user = interaction.guild!.members.cache.get(interaction.user.id)!;
 			// queue not set in db
-			insert_colname("music_state", { gid: interaction.guildId, vc_id: user.voice.channelId, tc_id: interaction.channelId, queue: [] });
+			const user = interaction.guild!.members.cache.get(interaction.user.id)!;
+			await db.insert(MusicState).values({ guild_id: interaction.guildId!, vc_id: user.voice.channelId ?? "", tc_id: interaction.channelId, queue: [] });
 		}
 	} else {
 		return interaction.editReply({ content: `⛔ **Nothing is playing!**`, allowedMentions: { repliedUser: false } });
@@ -744,7 +737,7 @@ export const play = async (interaction: ChatInputCommandInteraction<CacheType>, 
 	await interaction.editReply({ content: `🎶 **Loading** \`${videoInfo.videoDetails.title}\``, allowedMentions: { repliedUser: false } });
 
 	// get video resource
-	const queueItem = {
+	const queueItem: IMusicQueue = {
 		id: videoInfo.videoDetails.videoId,
 		type: videoInfo.videoDetails.isLiveContent ? "live" : "video",
 		title: videoInfo.videoDetails.title,
@@ -766,18 +759,26 @@ export const play = async (interaction: ChatInputCommandInteraction<CacheType>, 
 		mp.query = query;
 
 		// check db set or not
-		let checkExist = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
-		if (checkExist.length === 0) insert_colname("music_state", { gid: guild.id, vc_id: vc.id, tc_id: interaction.channelId, queue: [] });
-		else updateOne_colname("music_state", { gid: guild.id }, { $set: { vc_id: vc.id, tc_id: interaction.channelId } });
+		// let checkExist = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
+		let checkExist = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, guild.id) });
+
+		if (!checkExist) await db.insert(MusicState).values({ guild_id: guild.id, vc_id: vc.id, tc_id: interaction.channelId, queue: [] });
+		else await db.update(MusicState).set({ vc_id: vc.id, tc_id: interaction.channelId }).where(eq(MusicState.guild_id, guild.id));
 
 		await interaction.editReply({ content: `🎶 **Playing** \`${videoInfo.videoDetails.title}\``, allowedMentions: { repliedUser: false } });
 		await sendVideoInfo(interaction, "Now Playing", videoInfo);
 	} else {
 		// add to queue
 		// check db set or not
-		let checkExist = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
-		if (!checkExist) insert_colname("music_state", { gid: guild.id, vc_id: vc.id, tc_id: interaction.channelId, queue: [queueItem] });
-		else updateOne_colname("music_state", { gid: guild.id }, { $set: { vc_id: vc.id, tc_id: interaction.channelId }, $push: { queue: queueItem } });
+		// let checkExist = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
+		let checkExist = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, guild.id) });
+
+		if (!checkExist) await db.insert(MusicState).values({ guild_id: guild.id, vc_id: vc.id, tc_id: interaction.channelId, queue: [queueItem] });
+		else
+			await db
+				.update(MusicState)
+				.set({ vc_id: vc.id, tc_id: interaction.channelId, queue: sql`array_append(${MusicState.queue}, ${queueItem})` })
+				.where(eq(MusicState.guild_id, guild.id));
 
 		await interaction.editReply({ content: `🎶 **Added to queue** \`${videoInfo.videoDetails.title}\``, allowedMentions: { repliedUser: false } });
 		await sendVideoInfo(interaction, "Added to queue", videoInfo);
@@ -791,28 +792,25 @@ export const queue = async (interaction: ChatInputCommandInteraction<CacheType>)
 	const guild = interaction.guild!;
 
 	// check if user is in vc or not
-	let queueData = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
+	// let queueData = (await find_colname("music_state", { gid: guild.id })) as IMusicSession[];
+	let queueData = await db.query.MusicState.findFirst({ where: eq(MusicState.guild_id, guild.id) });
 
-	// if error db
-	if (queueData.length === 0) {
-		insert_colname("music_state", { gid: guild.id, vc_id: "", tc_id: interaction.channelId, queue: [] });
-
-		// empty queue
-		queueData = [{ queue: [] }] as unknown as IMusicSession[];
+	// if error db / not set
+	if (!queueData) {
+		let [temp] = await db.insert(MusicState).values({ guild_id: guild.id, vc_id: "", tc_id: interaction.channelId, queue: [] }).returning();
+		queueData = [temp] as unknown as MusicStateType;
 	}
 
-	const data = queueData[0];
+	const { queue } = queueData;
 	let maxShown = 10;
-	let loopAmount = Math.ceil(data.queue.length / maxShown); // loop amount
+	let loopAmount = Math.ceil(queue.length / maxShown); // loop amount
 
-	if (data.queue.length <= maxShown) {
+	if (queue.length <= maxShown) {
 		const embedData = new EmbedBuilder()
 			.setColor("#0099ff")
 			.setThumbnail("https://i.imgur.com/FWKIR7N.png")
 			.setAuthor({ name: "Queue for " + guild.name, iconURL: guild.iconURL({ extension: "png", size: 2048 }) as string })
-			.setDescription(
-				data.queue.length > 0 ? data.queue.map((song: any, index: number) => `${index + 1}. [${song.title}](${song.link})`).join("\n") : "Queue is currently empty!"
-			);
+			.setDescription(queue.length > 0 ? queue.map((song: any, index: number) => `${index + 1}. [${song.title}](${song.link})`).join("\n") : "Queue is currently empty!");
 
 		return interaction.editReply({ embeds: [embedData] });
 	} else {
@@ -824,7 +822,7 @@ export const queue = async (interaction: ChatInputCommandInteraction<CacheType>)
 				.setAuthor({ name: "Queue for " + guild.name, iconURL: guild.iconURL({ extension: "png", size: 2048 }) as string })
 				.setThumbnail("https://i.imgur.com/FWKIR7N.png")
 				.setDescription(
-					data.queue
+					queue
 						.map((song: any, index: number) => `${index + 1}. [${song.title}](${song.link})`)
 						.slice(i * 25, (i + 1) * 25)
 						.join("\n")

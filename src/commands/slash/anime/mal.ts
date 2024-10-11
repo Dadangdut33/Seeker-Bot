@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { malAnimeSearch, malMangaEmbed } from "../../../utils/commands/anime";
-import { btnPrompter } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { malAnimeSearch, malMangaEmbed } from "@/utils/commands/anime";
+import { btnPrompter } from "@/utils";
 import malScraper from "mal-scraper";
 
 const slashCommands: ISlashCommand = {

@@ -1,8 +1,8 @@
 import { Client, Guild, EmbedBuilder, TextChannel, GuildEmoji } from "discord.js";
-import { IBotEvent } from "../../types";
-import { logger } from "../../logger";
-import { OnlineUsers as onlineUsers, getEmoji, getMemberNewest, getMemberOldest, totalBots, convertToEpoch } from "../../utils/helper";
-import { prettyMilliseconds } from "../../utils/locallib/prettyms";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
+import { OnlineUsers as onlineUsers, getEmoji, getMemberNewest, getMemberOldest, totalBots, convertToEpoch } from "@/utils/helper";
+import { prettyMilliseconds } from "@/utils/lib/prettyms";
 
 const embedStats = (
 	client: Client,

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { convertToEpoch, prettyMilliseconds } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { convertToEpoch, prettyMilliseconds } from "@/utils";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("uptime").setDescription("Get bot's uptime"),

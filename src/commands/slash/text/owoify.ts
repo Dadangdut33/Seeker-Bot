@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 const owoify = require("owoify-js").default;
 
 const slashCommands: ISlashCommand = {

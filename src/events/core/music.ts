@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
-import { IBotEvent } from "../../types";
-import { registerPlayers } from "../../utils/commands/music";
+import { IBotEvent } from "@/types";
+import { registerPlayers } from "@/utils/commands/music";
 
 const event: IBotEvent = {
 	name: "ready",

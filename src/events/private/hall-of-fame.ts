@@ -1,31 +1,33 @@
 import { Client, EmbedBuilder, TextChannel } from "discord.js";
-import { IBotEvent } from "../../types";
-import { logger } from "../../logger";
-import { find_colname, insert_colname } from "../../utils";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
+import { db } from "@/utils/db";
+import { and, eq } from "drizzle-orm";
+import { HallOfFame } from "@/utils/db/schema";
 
 const event: IBotEvent = {
 	name: "ready",
 	once: true,
 	loadMsg: `👀 Module: ${__filename} loaded`,
 	execute: (client: Client) => {
-		const guildID = "913987561922396190",
-			channel_monitor_ID = "921456103722721303",
-			hallOfFame = "955133343094165594";
+		const g_id = "913987561922396190",
+			channel_to_monitor = "921456103722721303",
+			hof_channel = "955133343094165594";
 
-		if (!guildID || !channel_monitor_ID || !hallOfFame) return logger.warn("guild or channel ID not set!");
+		if (!g_id || !channel_to_monitor || !hof_channel) return logger.warn("guild or channel ID not set!");
 
 		// get guild by id
-		const guild = client.guilds.cache.get(guildID);
+		const guild = client.guilds.cache.get(g_id);
 		if (!guild) return logger.warn("Invalid guild for message spotlight");
 
 		// get channel by id
-		const channel_spotlight = guild.channels.cache.get(hallOfFame) as TextChannel;
+		const channel_spotlight = guild.channels.cache.get(hof_channel) as TextChannel;
 		if (!channel_spotlight) return logger.warn("Invalid channel for message spotlight");
 
 		// listener for a channel message
 		client.on("messageCreate", async (message) => {
 			try {
-				if (!channel_monitor_ID.includes(message.channel.id)) return;
+				if (!channel_to_monitor.includes(message.channel.id)) return;
 				if (message.author.bot) return;
 
 				let imgExist = true;
@@ -52,13 +54,13 @@ const event: IBotEvent = {
 			try {
 				if (!reaction.message.guild) return; // make sure it is in a guild
 				if (reaction.message.guild.id !== guild.id) return; // make sure it is in the same guild
-				if (!channel_monitor_ID.includes(reaction.message.channel.id)) return; // make sure the correct channel is being monitored
+				if (!channel_to_monitor.includes(reaction.message.channel.id)) return; // make sure the correct channel is being monitored
 
 				const msg = await reaction.message.channel.messages.fetch(reaction.message.id); // fetch the message
 
 				// get the msg and reactor object
 				const reactor = await msg.guild!.members.fetch(user.id);
-				
+
 				// make sure user is admin
 				if (!reactor.permissions.has("Administrator")) return;
 
@@ -67,17 +69,13 @@ const event: IBotEvent = {
 
 				// -------------------------------------
 				// make sure it's not a dupe or already in the DB
-				const data = {
-					guildID: guildID,
-					channelID: reaction.message.channel.id,
-					messageID: reaction.message.id,
-				};
-
-				const db_Data = (await find_colname("hall_of_fame", data)) as (typeof data)[];
-				if (db_Data.length > 0) return; // if already in db, return
+				const found = await db.query.HallOfFame.findFirst({
+					where: and(eq(HallOfFame.guild_id, g_id), eq(HallOfFame.ch_id, reaction.message.channel.id), eq(HallOfFame.msg_id, reaction.message.id)),
+				});
+				if (found) return; // if already in db, return
 
 				// insert to db if not already in db
-				await insert_colname("hall_of_fame", data);
+				await db.insert(HallOfFame).values({ guild_id: g_id, ch_id: reaction.message.channel.id, msg_id: reaction.message.id });
 
 				// -------------------------------------
 				// random footer
@@ -92,9 +90,9 @@ const event: IBotEvent = {
 					.setAuthor({
 						name: msg.author.username,
 						iconURL: msg.author.displayAvatarURL({ extension: "png", size: 2048 }),
-						url: `https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id}`,
+						url: `https://discord.com/channels/${g_id}/${reaction.message.channel.id}/${reaction.message.id}`,
 					})
-					.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${guildID}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
+					.addFields([{ name: `Source`, value: `[Jump](https://discord.com/channels/${g_id}/${reaction.message.channel.id}/${reaction.message.id})`, inline: true }])
 					.setFooter({ text: footerChoice[Math.floor(Math.random() * footerChoice.length)] })
 					.setTimestamp();
 

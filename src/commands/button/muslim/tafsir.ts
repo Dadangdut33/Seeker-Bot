@@ -1,6 +1,6 @@
-import { logger } from "../../../logger";
-import { IButtonCommand } from "../../../types";
-import { interactionBtnMultiEmbedPaginator, embedTafsir } from "../../../utils";
+import { logger } from "@/logger";
+import { IButtonCommand } from "@/types";
+import { interactionBtnMultiEmbedPaginator, embedTafsir } from "@/utils";
 
 const command: IButtonCommand = {
 	id: "tafsir",

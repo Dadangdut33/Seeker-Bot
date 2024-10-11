@@ -11,6 +11,7 @@ import {
 } from "discord.js";
 import { Document } from "mongoose";
 import { AudioPlayer } from "@discordjs/voice";
+import { ServerConfigType } from "./utils/db/schema";
 
 // ------------------ Bot - DB ------------------
 export interface ICommand {
@@ -47,16 +48,6 @@ export interface IBotEvent {
 	once?: boolean | false;
 	execute: (...args) => void;
 	disabled?: boolean;
-}
-
-interface IGuildOptions {
-	prefix: string;
-}
-
-export interface IGuild {
-	guildID: string;
-	options: GuildOptions;
-	joinedAt?: Date;
 }
 
 export type TGuildOption = keyof IGuildOptions;
@@ -98,6 +89,11 @@ export interface IMusicQueue {
 	link: string;
 	query: string;
 }
+
+export interface IGuildOptions {
+	prefix: string;
+}
+export type KeyOfGuildOptions = keyof IGuildOptions;
 
 export interface IMusicSession {
 	gid: string;
@@ -250,7 +246,7 @@ declare module "discord.js" {
 		commands: Collection<string, ICommand>;
 		buttonCommands: Collection<string, IButtonCommand>;
 		cooldowns: Collection<string, number>;
-		guildPreferences: Collection<string, IGuild>;
+		guildPreferences: Collection<string, ServerConfigType>;
 		musicPlayers: Collection<string, IMusicPlayer>;
 	}
 }

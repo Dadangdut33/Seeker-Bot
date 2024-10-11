@@ -1,16 +1,18 @@
-import { setGuildOption } from "../../../utils";
-import { ICommand } from "../../../types";
+import { ICommand } from "@/types";
+import { db } from "@/utils/db";
+import { ServerConfig } from "@/utils/db/schema";
+import { eq } from "drizzle-orm";
 
 const command: ICommand = {
 	name: "prefix",
 	description: "Change the prefix of the bot in the current guild",
-	execute: (message, args) => {
+	execute: async (message, args) => {
 		let prefix = args[1];
 		if (!prefix) return message.channel.send("No prefix provided");
 		if (!message.guild) return;
 		const joinedAt = message.client.guilds.cache.get(message.guild.id)?.joinedAt || new Date();
-		setGuildOption(message.client, message.guild, "prefix", prefix);
-		message.client.guildPreferences.set(message.guild.id, { guildID: message.guild.id, options: prefix, joinedAt });
+		await db.update(ServerConfig).set({ options: { prefix } }).where(eq(ServerConfig.guild_id, message.guild.id));
+		message.client.guildPreferences.set(message.guild.id, { guild_id: message.guild.id, options: { prefix }, joined_at: joinedAt });
 		message.channel.send("Prefix successfully changed!");
 	},
 	permissions: ["Administrator"],

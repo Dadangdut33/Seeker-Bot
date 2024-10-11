@@ -1,17 +1,20 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import Parser from "rss-parser";
-import { find_colname, insert_colname, updateOne_colname } from "./db";
+import { db } from "./db";
+import { Feed } from "./db/schema";
+import { and, eq } from "drizzle-orm";
+import { FeedEnumType } from "./db/schema/_enum";
 const parser = new Parser();
 
-export const run_rss = async (gid: string, type: string, feedurl: string, nyaa = false) => {
+export const run_rss = async (gid: string, type: FeedEnumType, feedurl: string, nyaa = false) => {
 	const feed = await parser.parseURL(feedurl);
 
 	// check if guild is registered in db
-	const check = (await find_colname("rssfeeds", { gid: gid, type: type })) as { gid: string; last_feed: string }[];
+	const q = await db.query.Feed.findFirst({ where: and(eq(Feed.guild_id, gid), eq(Feed.type, type)) });
 
-	if (check.length === 0) {
+	if (!q) {
 		// if not, insert/register it and no need to slice the feed
-		await insert_colname("rssfeeds", { gid, last_feed: feed.items[0].guid, type: type });
+		await db.insert(Feed).values({ guild_id: gid, last_feed: feed.items[0].guid ?? "", type: type });
 	} else {
 		// cut feed from 0 to last found
 		let limit = 15,
@@ -19,7 +22,7 @@ export const run_rss = async (gid: string, type: string, feedurl: string, nyaa =
 			counter = 0;
 
 		if (nyaa) {
-			const last_feed = check[0].last_feed,
+			const last_feed = q.last_feed,
 				splitted = last_feed.split("/"),
 				baseLink = splitted.slice(0, splitted.length - 1).join("/");
 
@@ -32,10 +35,8 @@ export const run_rss = async (gid: string, type: string, feedurl: string, nyaa =
 				if (counter === limit) break;
 			}
 		} else {
-			// get index of last found
-			// in a while loop because item can sometimes already removed from feed
 			while (index === -1) {
-				index = feed.items.findIndex((item) => item.guid === check[0].last_feed);
+				index = feed.items.findIndex((item) => item.guid === q.last_feed);
 
 				counter++;
 				if (counter === limit) break;
@@ -43,7 +44,10 @@ export const run_rss = async (gid: string, type: string, feedurl: string, nyaa =
 		}
 
 		// update db
-		await updateOne_colname("rssfeeds", { gid: gid, type: type }, { $set: { last_feed: feed.items[0].guid } });
+		await db
+			.update(Feed)
+			.set({ last_feed: feed.items[0].guid })
+			.where(and(eq(Feed.guild_id, gid), eq(Feed.type, type)));
 
 		// if index is -1, then last found is not found in feed which means no cut
 		// slice feed from 0 to last found
@@ -60,8 +64,8 @@ export const run_rss = async (gid: string, type: string, feedurl: string, nyaa =
 	return feed;
 };
 
-export const send_mal = async (gid: string, type: string, feedurl: string, channel: TextChannel) => {
-	const feed = await run_rss(gid, type, feedurl);
+export const send_mal = async (gid: string, feedurl: string, channel: TextChannel) => {
+	const feed = await run_rss(gid, "mal", feedurl);
 	if (!feed) return; // if feed is empty, then no new item and no need to send message
 
 	let embedList = [];
@@ -106,8 +110,8 @@ export const send_mal = async (gid: string, type: string, feedurl: string, chann
 	}
 };
 
-export const send_crunchyroll = async (gid: string, type: string, feedurl: string, channel: TextChannel) => {
-	const feed = await run_rss(gid, type, feedurl);
+export const send_crunchyroll = async (gid: string, feedurl: string, channel: TextChannel) => {
+	const feed = await run_rss(gid, "crunchyroll", feedurl);
 	if (!feed) return; // if feed is empty, then no new item and no need to send message
 
 	let embedList = [];
@@ -152,8 +156,8 @@ export const send_crunchyroll = async (gid: string, type: string, feedurl: strin
 	}
 };
 
-export const send_ann = async (gid: string, type: string, feedurl: string, channel: TextChannel) => {
-	const feed = await run_rss(gid, type, feedurl);
+export const send_ann = async (gid: string, feedurl: string, channel: TextChannel) => {
+	const feed = await run_rss(gid, "ann", feedurl);
 	if (!feed) return; // if feed is empty, then no new item and no need to send message
 
 	let embedList = [];
@@ -198,8 +202,8 @@ export const send_ann = async (gid: string, type: string, feedurl: string, chann
 	}
 };
 
-export const send_nyaa = async (gid: string, type: string, feedurl: string, channel: TextChannel) => {
-	const feed = await run_rss(gid, type, feedurl, true);
+export const send_nyaa = async (gid: string, feedurl: string, channel: TextChannel) => {
+	const feed = await run_rss(gid, "nyaa", feedurl, true);
 	if (!feed) return; // if feed is empty, then no new item and no need to send message
 
 	let embedList = [];

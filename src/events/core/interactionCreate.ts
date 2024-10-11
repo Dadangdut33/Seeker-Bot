@@ -1,6 +1,6 @@
 import { Interaction } from "discord.js";
-import { IBotEvent } from "../../types";
-import { logger } from "../../logger";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
 
 const event: IBotEvent = {
 	name: "interactionCreate",

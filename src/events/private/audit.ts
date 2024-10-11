@@ -1,12 +1,13 @@
 import { Client, TextChannel, Guild, APIEmbed, ChannelType } from "discord.js";
-import { find_model, CUSTOM_COLORS } from "../../utils";
-import { IBotEvent, AuditWatch_I } from "../../types";
-import { logger } from "../../logger";
-import { AuditWatchModel } from "../../schemas";
+import { IBotEvent } from "@/types";
+import { CUSTOM_COLORS } from "@/utils/constants";
+import { logger } from "@/logger";
+import { db } from "@/utils";
+import { AuditWatchType } from "@/utils/db/schema";
 const debugmode = false;
 
 interface optionsInterface {
-	options: AuditWatch_I[];
+	options: AuditWatchType[];
 }
 
 function AuditLog(client: Client, options: optionsInterface) {
@@ -322,30 +323,30 @@ Proxy: \n${message.attachments.map((x) => x.proxyURL).join("\n")}
 	// SEND FUNCTION
 	async function send(client: Client, guild: Guild, opt: optionsInterface, embed: APIEmbed) {
 		try {
-			let cur_opt = opt.options.find((val) => val.guildID === guild.id);
+			let cur_opt = opt.options.find((val) => val.guild_id === guild.id);
 
 			if (!cur_opt) return logger.debug(`Module: ${__filename} | Invalid options ${cur_opt}`);
 			if (debugmode) logger.debug(`Module: ${__filename} | configuration get options:`, opt); // DEBUG
 
-			const channelname = cur_opt.outputChName;
-			if (!channelname) {
+			const ch_nameid = cur_opt.output_ch_nameid;
+			if (!ch_nameid) {
 				if (debugmode) logger.debug(`Module: ${__filename} | send - no channel configured`);
 				return;
 			}
 
 			// check channel
-			const channel = guild.channels.cache.find((val) => val.name === channelname) || guild.channels.cache.find((val) => val.id === channelname);
-			if (!channel) return logger.debug(`${__filename} -> The channel "${channelname}" do not exist on server "${guild.name}" (${guild.id})`);
+			const channel = guild.channels.cache.find((val) => val.name === ch_nameid) || guild.channels.cache.find((val) => val.id === ch_nameid);
+			if (!channel) return logger.debug(`${__filename} -> The channel "${ch_nameid}" do not exist on server "${guild.name}" (${guild.id})`);
 
 			// check permission
 			if (!channel.permissionsFor(client.user!)!.has("SendMessages"))
 				return logger.debug(
-					`${__filename} -> The client doesn't have the permission to send message to the configured channel "${channelname}" on server "${guild.name}" (${guild.id})`
+					`${__filename} -> The client doesn't have the permission to send message to the configured channel "${ch_nameid}" on server "${guild.name}" (${guild.id})`
 				);
 
 			if (!channel.permissionsFor(client.user!)!.has("EmbedLinks"))
 				return logger.debug(
-					`${__filename} -> The client doesn't have the permission EmbedLinks to the configured channel "${channelname}" on server "${guild.name}" (${guild.id})`
+					`${__filename} -> The client doesn't have the permission EmbedLinks to the configured channel "${ch_nameid}" on server "${guild.name}" (${guild.id})`
 				);
 
 			if (debugmode) logger.debug(`Module: ${__filename} | send - sending embed to ${channel.name}`);
@@ -363,7 +364,8 @@ const event: IBotEvent = {
 	once: true,
 	execute: async (client: Client) => {
 		try {
-			const watchlist = (await find_model(AuditWatchModel, {})) as unknown as AuditWatch_I[];
+			// const watchlist = (await find_model(AuditWatchModel, {})) as unknown as AuditWatch_I[];
+			const watchlist = await db.query.AuditWatch.findMany({});
 			AuditLog(client, { options: watchlist });
 		} catch (error) {
 			logger.error(`Module: ${__filename} | Fail to load, details: ${error}`);

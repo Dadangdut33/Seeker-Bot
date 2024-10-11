@@ -1,7 +1,9 @@
 import { Client, TextChannel } from "discord.js";
-import { IBotEvent } from "../../types";
-import { logger } from "../../logger";
-import { send_nyaa } from "../../utils/rss";
+import { IBotEvent } from "@/types";
+import { logger } from "@/logger";
+import { send_nyaa } from "@/utils/rss";
+import { CronJob } from "cron";
+import { env } from "@/env";
 
 const event: IBotEvent = {
 	name: "ready",
@@ -9,8 +11,8 @@ const event: IBotEvent = {
 	disabled: true,
 	loadMsg: `👀 Module: ${__filename} rss feed | Loading feed`,
 	execute: async (client: Client) => {
-		const gid = process.env.PERSONAL_SERVER_ID!,
-			channelID = process.env.PERSONAL_SERVER_NYAA_CHANNEL_ID!;
+		const gid = env.PERSONAL_SERVER_ID!,
+			channelID = env.PERSONAL_SERVER_NYAA_CHANNEL_ID!;
 
 		if (!gid || !channelID) return logger.warn("guild or channel ID not set!");
 
@@ -24,7 +26,7 @@ const event: IBotEvent = {
 		logger.debug(`Module: Nyaa rss feed | Guild: ${theGuild.name}`);
 		const send = async () => {
 			try {
-				await send_nyaa(gid, "nyaa", "https://nyaa.si/?page=rss", theChannel);
+				await send_nyaa(gid, "https://nyaa.si/?page=rss", theChannel);
 			} catch (e) {
 				logger.error(`[ERROR] [nyaa] startup fail to run nyaa rss feed | ${e}`);
 			}
@@ -32,9 +34,8 @@ const event: IBotEvent = {
 
 		// run on startup
 		await send();
-		setInterval(async () => {
-			await send();
-		}, 60 * 1000 * 15); // 30 minutes
+		const cron = new CronJob("*/30 * * * *", async () => await send(), null, true, "Asia/Jakarta");
+		cron.start();
 	},
 };
 

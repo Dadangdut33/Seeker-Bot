@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { CUSTOM_COLORS } from "../../../utils";
-import { ISlashCommand } from "../../../types";
+import { CUSTOM_COLORS } from "@/utils";
+import { ISlashCommand } from "@/types";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("ping").setDescription("Shows the bot's ping"),

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, TextChannel, EmbedBuilder, ColorResolvable } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { logger } from "../../../logger";
+import { ISlashCommand } from "@/types";
+import { logger } from "@/logger";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 import { getVideoID, validateURL } from "ytdl-core";
 
 const slashCommands: ISlashCommand = {

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { fancy } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { fancy } from "@/utils";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()

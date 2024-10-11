@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
+import { ISlashCommand } from "@/types";
 const stutterify = require("stutterify");
 
 const slashCommands: ISlashCommand = {

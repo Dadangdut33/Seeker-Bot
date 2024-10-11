@@ -1,8 +1,9 @@
 import { Client, Routes, SlashCommandBuilder } from "discord.js";
-import { cmd_btn_dir, cmd_msg_dir, cmd_slash_dir, logColor, walkdir } from "../utils";
+import { CMD_BTN_DIR, CMD_MSG_DIR, CMD_SLASH_DIR, logColor, walkdir } from "../utils";
 import { IButtonCommand, ICommand, ISlashCommand } from "../types";
 import { logger } from "../logger";
-import express, { Request, Response } from "express";
+import { env } from "@/env";
+import fastify from "fastify";
 
 /**
  * @description
@@ -15,7 +16,7 @@ module.exports = (client: Client) => {
 
 	// ------------------------------ //
 	logger.info(logColor("text", `🔥 Loading commands...`));
-	walkdir(cmd_msg_dir).forEach((file) => {
+	walkdir(CMD_MSG_DIR).forEach((file) => {
 		try {
 			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 			let command: ICommand = require(file).default;
@@ -32,7 +33,7 @@ module.exports = (client: Client) => {
 	});
 
 	logger.info(logColor("text", `🔥 Loading slash commands...`));
-	walkdir(cmd_slash_dir).forEach((file) => {
+	walkdir(CMD_SLASH_DIR).forEach((file) => {
 		try {
 			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 			let slashCommand: ISlashCommand = require(file).default;
@@ -49,7 +50,7 @@ module.exports = (client: Client) => {
 	});
 
 	logger.info(logColor("text", `🔥 Loading button commands...`));
-	walkdir(cmd_btn_dir).forEach((file) => {
+	walkdir(CMD_BTN_DIR).forEach((file) => {
 		try {
 			if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
 			let buttonCommand: IButtonCommand = require(file).default;
@@ -64,12 +65,15 @@ module.exports = (client: Client) => {
 		}
 	});
 
-	const app = express();
-	const port = process.env.PORT || 10032;
+	const app = fastify({
+		logger: true,
+	});
+	const port = parseInt(env.PORT) || 10032;
 
-	app.get("/", (_req: Request, res: Response) => res.send("<h1>Hello World!</h1>"));
-	app.put(Routes.applicationCommands(process.env.CLIENT_ID), (_req: Request, res: Response) => {
+	app.get("/", (_req, res) => res.send("Hello World! Bot is running"));
+	app.put(Routes.applicationCommands(process.env.CLIENT_ID), (_req, res) => {
 		res.send(slashCommands.map((command) => command.toJSON()));
 	});
-	app.listen(port, () => logger.info(`Server listening at http://localhost:${port}`));
+	// app.listen(port, () => logger.info(`Server listening at http://localhost:${port}`));
+	app.listen({ port, host: "0.0.0.0" });
 };

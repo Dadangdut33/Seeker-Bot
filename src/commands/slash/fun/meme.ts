@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { randomPuppy } from "../../../utils/commands";
+import { ISlashCommand } from "@/types";
+import { randomPuppy } from "@/utils/commands";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("meme").setDescription("Sends an epic meme from reddit"),

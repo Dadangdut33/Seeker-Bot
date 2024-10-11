@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IEquranIdSurah, IEquranIdSurahTafsir, IQuranComVerse } from "../../types";
+import { IEquranIdSurah, IEquranIdSurahTafsir, IQuranComVerse } from "@/types";
 import { EmbedBuilder } from "discord.js";
 import { htmlToText } from "html-to-text";
 const version_quran_com = "v4",

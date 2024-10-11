@@ -1,11 +1,13 @@
 import { Message, ChannelType } from "discord.js";
-import mongoose from "mongoose";
 import malScraper from "mal-scraper";
-import { logger } from "../../logger";
-import { find_colname, getGuildOption, insert_colname, updateOne_colname } from "../db";
-import { capitalizeFirstLetter, hasEmoji, hasLink, hasNumber } from "../index";
-import { detect, format } from "../locallib/detect-haiku/detect-haiku";
+import { logger } from "@/logger";
+import { capitalizeFirstLetter, db, hasEmoji, hasLink, hasNumber } from "@/utils";
+import { detect, format } from "../lib/detect-haiku/detect-haiku";
 import { malAnimeSearch as malAnimeSearch, malMangaEmbed } from "../commands/anime";
+import { getGuildOption } from "../server";
+import { and, eq } from "drizzle-orm";
+import { HaikuWatch } from "../db/schema";
+import { increment } from "../db/utils";
 
 export const crosspost = (message: Message) => {
 	try {
@@ -28,11 +30,7 @@ export const detectHaiku = async (message: Message) => {
 	try {
 		if (!message.guild) return; // must be in guild
 
-		let prefix = process.env.PREFIX;
-		if (mongoose.connection.readyState === 1) {
-			let guildPrefix = await getGuildOption(message.client, message.guild, "prefix");
-			if (guildPrefix) prefix = guildPrefix;
-		}
+		let prefix = await getGuildOption(message.client, message.guild, "prefix");
 
 		// rejected format
 		if (
@@ -54,10 +52,13 @@ export const detectHaiku = async (message: Message) => {
 			if (haikuGet.length === 0) return;
 
 			const { author, guild } = message;
-			// find in db
-			const checkExist = await find_colname("haiku", { author: author.id, guildID: guild?.id }); // guildID
-			if (checkExist!.length === 0) insert_colname("haiku", { author: author.id, guildID: guild?.id, count: 1 });
-			else updateOne_colname("haiku", { author: author.id, guildID: guild?.id }, { $set: { count: checkExist![0].count + 1 } });
+			const found = await db.query.HaikuWatch.findFirst({ where: and(eq(HaikuWatch.author_id, author.id), eq(HaikuWatch.guild_id, guild.id)) });
+			if (!found) await db.insert(HaikuWatch).values({ author_id: author.id, guild_id: guild.id, count: 1 });
+			else
+				await db
+					.update(HaikuWatch)
+					.set({ count: increment(HaikuWatch.count, 1) })
+					.where(and(eq(HaikuWatch.author_id, author.id), eq(HaikuWatch.guild_id, guild.id)));
 
 			haikuGet.forEach((item, index) => {
 				haikuGet[index] = capitalizeFirstLetter(item);
@@ -73,7 +74,7 @@ export const detectHaiku = async (message: Message) => {
 							url: "https://en.wikipedia.org/wiki/Haiku",
 						},
 						description: `*${haikuGet.join("\n\n").replace(/[\*\`\"]/g, "")}*`,
-						footer: { text: `Haiku Detected, Sometimes successfully\nTotal Haiku(s) in this server: ${checkExist?.length === 0 ? 1 : checkExist![0].count + 1}` },
+						footer: { text: `Haiku Detected, Sometimes successfully\nTotal Haiku(s) in this server: ${found ? found.count + 1 : 1}` },
 						color: rgb,
 					},
 				],

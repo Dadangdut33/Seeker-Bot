@@ -1,25 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import {
-	pause,
-	play,
-	seek,
-	skip,
-	stop,
-	unpause,
-	auto,
-	clear,
-	forward,
-	rewind,
-	remove,
-	join,
-	leave,
-	loop,
-	lyrics,
-	nowPlaying,
-	move,
-	queue,
-} from "../../../utils/commands/music";
+import { ISlashCommand } from "@/types";
+import { pause, play, seek, skip, stop, unpause, auto, clear, forward, rewind, remove, join, leave, loop, lyrics, nowPlaying, move, queue } from "@/utils/commands/music";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder()

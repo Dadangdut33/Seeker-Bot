@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { getAdvice } from "../../../utils/commands";
+import { ISlashCommand } from "@/types";
+import { getAdvice } from "@/utils/commands";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("advice").setDescription("Gives you random advice"),

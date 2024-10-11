@@ -1,6 +1,6 @@
 import { Chance } from "chance";
 
-export const autist_text = (text: string) => {
+export const annoying_text = (text: string) => {
 	return text
 		.split("")
 		.map((v) => (Chance().bool() ? v.toUpperCase() : v.toLowerCase()))

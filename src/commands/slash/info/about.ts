@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { prettyMilliseconds } from "../../../utils";
+import { ISlashCommand } from "@/types";
+import { prettyMilliseconds } from "@/utils";
 
 const slashCommands: ISlashCommand = {
 	command: new SlashCommandBuilder().setName("about").setDescription("Shows what the bot is about. This include the bot's status & description"),

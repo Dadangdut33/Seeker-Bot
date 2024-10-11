@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { ISlashCommand } from "../../../types";
-import { logger } from "../../../logger";
+import { ISlashCommand } from "@/types";
+import { logger } from "@/logger";
 import axios from "axios";
 
 const slashCommands: ISlashCommand = {

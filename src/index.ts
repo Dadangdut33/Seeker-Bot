@@ -1,25 +1,14 @@
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
-import { ICommand, ISlashCommand, IGuild, IButtonCommand, IMusicPlayer } from "./types";
-import { config } from "dotenv";
+import { ICommand, ISlashCommand, IButtonCommand, IMusicPlayer } from "./types";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { connect_db } from "./utils/db";
 import { logger } from "./logger";
+import { ServerConfigType } from "./utils/db/schema";
+import { env } from "./env";
 
 // ------------------------------ //
-config(); // load and check .env
-if (!process.env.PREFIX) throw new Error("ERROR!!! Prefix is not set | Check your .env");
-if (!process.env.TOKEN) throw new Error("ERROR!!! Token is not set | Check your .env");
-if (!process.env.MONGO_URI) throw new Error("ERROR!!! MONGO_URI is not set | Check your .env");
-if (!process.env.MONGO_DATABASE_NAME) throw new Error("ERROR!!! MONGO_DATABASE_NAME is not set | Check your .env");
-if (!process.env.SERVER_INVITE) logger.warn("WARNING!!! Server invite is not set | Set it in your .env");
-if (!process.env.MANGADEX_USERNAME) logger.warn("WARNING!!! Mangadex username is not set | Set it in your .env");
-if (!process.env.MANGADEX_PASSWORD) logger.warn("WARNING!!! Mangadex password is not set | Set it in your .env");
-if (!process.env.SAUCENAO_API_KEY) logger.warn("WARNING!!! SauceNao API key is not set | Set it in your .env");
-
 (async () => {
-	await connect_db();
-
+	logger.info(`🚀 Starting with ENV: ${env}`);
 	// Create client with all the configs and store custom properties
 	const client = new Client({
 		intents: Object.keys(GatewayIntentBits).map((a) => {
@@ -32,7 +21,7 @@ if (!process.env.SAUCENAO_API_KEY) logger.warn("WARNING!!! SauceNao API key is n
 	client.commands = new Collection<string, ICommand>();
 	client.slashCommands = new Collection<string, ISlashCommand>();
 	client.buttonCommands = new Collection<string, IButtonCommand>();
-	client.guildPreferences = new Collection<string, IGuild>();
+	client.guildPreferences = new Collection<string, ServerConfigType>();
 	client.cooldowns = new Collection<string, number>();
 	client.musicPlayers = new Collection<string, IMusicPlayer>();
 

@@ -4,5 +4,5 @@ export * from "./db";
 export * from "./helper";
 export * from "./text";
 export * from "./commands/verse";
-export * from "./locallib/fancyfies";
-export * from "./locallib/prettyms";
+export * from "./lib/fancyfies";
+export * from "./lib/prettyms";

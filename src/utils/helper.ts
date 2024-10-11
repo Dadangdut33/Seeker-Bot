@@ -17,7 +17,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import chalk from "chalk";
 import moment from "moment-timezone";
-import { prettyMilliseconds } from "./locallib/prettyms";
+import { prettyMilliseconds } from "./lib/prettyms";
 import { consoleColorType, CONSOLE_COLORS } from "./constants";
 import { logger } from "../logger";
 
